@@ -1,5 +1,6 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  h1 Dashboard
+  div hello #{nickname}!
+  a(href="/auth/signout") Sign out

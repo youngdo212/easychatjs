@@ -3,7 +3,11 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  if(!req.session.isLogined) return res.redirect('/auth/signin');
+
+  const nickname = req.session.nickname;
+
+  res.render('index', {nickname});
 });
 
 module.exports = router;

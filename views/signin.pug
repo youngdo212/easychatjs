@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  form(
+    action="/auth/signin"
+    method="post"
+  )
+    div
+      input(
+        type="text"
+        name="email"
+        placeholder="email"
+        required
+      )
+    div
+      input(
+        type="password"
+        name="password"
+        placeholder="password"
+        required
+      )
+    div
+      button(type="submit") Sign in
+  a(href="/auth/signup") Sign up
+  if fail
+    div(style="color: red;")=failMessage
