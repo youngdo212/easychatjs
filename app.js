@@ -5,12 +5,16 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const io = require('socket.io')();
 
 var indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const projectsRouter = require('./routes/projects');
 
 var app = express();
+
+// socket.io setup
+app.io = io;
 
 // mongoose setup
 const db = mongoose.connection;
@@ -59,5 +63,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+io.on('connection', (socket) => {
+  console.log('a socket.io user connected!');
+})
 
 module.exports = app;
