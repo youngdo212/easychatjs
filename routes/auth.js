@@ -36,6 +36,7 @@ router.post('/signin', async (req, res, next) => {
   });
 
   req.session.isLogined = true;
+  req.session.accountId = account._id;
   req.session.nickname = account.nickname;
 
   res.redirect('/');

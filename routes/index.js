@@ -1,13 +1,21 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const Project = require('../models/project');
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', async (req, res, next) => {
   if(!req.session.isLogined) return res.redirect('/auth/signin');
 
   const nickname = req.session.nickname;
+  const accountId = req.session.accountId;
+  const projects = await Project.find({
+    accountId,
+  }).then();
 
-  res.render('index', {nickname});
+  res.render('index', {
+    nickname, 
+    projects,
+  });
 });
 
 module.exports = router;

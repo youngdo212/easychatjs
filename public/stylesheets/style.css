@@ -1,8 +1,62 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
+}
+
+.project-container {
+  margin-top: 40px;
+}
+
+.project-header {
+  box-sizing: border-box;
+  padding: 10px 0px;
+}
+
+.project-header__text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  padding: 5px;
+}
+
+.project-table {
+  margin-top: 10px;
+}
+
+.button {
+  
+}
+
+.button--add-project {
+
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0px; left: 0px;
+  width: 100vw; height: 100vh;
+  background: rgb(0, 0, 0, 0.3);
+}
+
+.modal--visible {
+  display: block;
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%; left: 50%;
+  background: #fff;
+  transform: translate3d(-50%, -50%, 0);
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
 }

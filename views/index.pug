@@ -2,5 +2,36 @@ extends layout
 
 block content
   h1 Dashboard
-  div hello #{nickname}!
+  div hello #{nickname}
   a(href="/auth/signout") Sign out
+
+  .project-container
+    .project-header
+      span.project-header__text Projects
+      button.button.button--add-project Add
+    table.project-table
+      tr
+        th.project-table__header.project-table__header--name name
+        th.project-table__header.project-table__header--api-key api key
+        th.project-table__header.project-table__header--delete delete
+      each project in projects
+        tr
+          td=project.name
+          td=project.apiKey
+          th
+            button Delete
+  .modal
+    .modal-content
+      form(
+        action="/projects"
+        method="post"
+      )
+        div
+          input(
+            type="text"
+            name="name"
+            placeholder="project name"
+            style="margin-bottom: 10px;"
+          )
+        button(type="submit") Create
+        
