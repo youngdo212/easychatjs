@@ -5,5 +5,8 @@ module.exports = {
   output: {
     filename: 'messenger.js',
     path: path.resolve(__dirname, 'public/sdk'),
-  }
+  },
+  // optimization: {
+	// 	minimize: false
+	// },
 }
