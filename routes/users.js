@@ -90,11 +90,11 @@ router.post('/:id/friendrequests', async (req, res, next) => {
   const friendrequestForClient = await Friendrequest.findById(friendrequest._id)
     .populate({
       path: 'from',
-      select: '_id email nickname',
+      select: '_id email nickname isPresent',
     })
     .populate({
       path: 'to',
-      select: '_id email nickname',
+      select: '_id email nickname isPresent',
     })
     .then();
   

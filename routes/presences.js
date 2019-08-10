@@ -12,7 +12,7 @@ router.get('/out', async (req, res, next) => {
   user = await User.findById(userId)
   .populate('friends')
   .then();
-  
+
   user.friends.forEach((friend) => {
     req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());
   })
@@ -54,11 +54,11 @@ router.post('/in', async (req, res, next) => {
     const friendrequestForClient = await Friendrequest.findById(friendrequest._id)
       .populate({
         path: 'from',
-        select: '_id email nickname',
+        select: '_id email nickname isPresent',
       })
       .populate({
         path: 'to',
-        select: '_id email nickname',
+        select: '_id email nickname isPresent',
       })
       .then();
 
