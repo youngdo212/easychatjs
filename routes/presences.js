@@ -15,7 +15,7 @@ router.get('/out', async (req, res, next) => {
   })
   req.io.to(userId).emit('user-state-changed', null);
 
-  res.redirect('/');
+  res.send();
 });
 
 router.post('/in', async (req, res, next) => {
@@ -65,6 +65,8 @@ router.post('/in', async (req, res, next) => {
       });
     })
   }, Promise.resolve());
+
+  res.send();
 })
 
 module.exports = router;
