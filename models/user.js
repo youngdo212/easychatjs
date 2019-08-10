@@ -12,6 +12,14 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Friendrequest',
   }],
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  isPresent: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 userSchema.methods.convertToClientObject = function() {
@@ -19,6 +27,7 @@ userSchema.methods.convertToClientObject = function() {
     _id: this._id,
     email: this.email,
     nickname: this.nickname,
+    isPresent: this.isPresent,
   };
 }
 

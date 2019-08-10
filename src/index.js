@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
 import formurlencoded from 'form-urlencoded';
+import CurrentUser from './currentUser';
 
 window.Messenger = class {
   constructor({apiKey}) {
@@ -23,7 +24,16 @@ window.Messenger = class {
   }
 
   onUserStateChanged(callback) {
-    this.socket.on('user-state-changed', callback);
+    this.socket.on('user-state-changed', (user) => {
+      if(!user) return callback(null);
+      
+      const currentUser = new CurrentUser({
+        user,
+        origin: this.origin,
+        socket: this.socket,
+      });
+      callback(currentUser);
+    });
   }
 
   async createUser(email, password, nickname) {
@@ -80,17 +90,30 @@ window.Messenger = class {
   async searchUsers(value, {field} = {}) {
     const encodedValue = encodeURIComponent(value);
     const fields = field ? [field] : ['email', 'nickname'];
-    let users = [];
+    const users = [];
 
     for(let i = 0; i < fields.length; i++) {
       const field = fields[i];
       const response = await fetch(`${this.origin}/users?field=${field}&value=${encodedValue}`, {credentials: 'include'});
       const json = await response.json();
 
-      users = users.concat(json);
+      this.pushWithoutDuplication(users, json);
     }
     
     return users;
+  }
+
+  // refactoring
+  pushWithoutDuplication(sources, targets) {
+    const corrects = [];
+
+    targets.forEach((target) => {
+      if(sources.some((source) => source.email === target.email)) return;
+
+      corrects.push(target);
+    });
+
+    sources.push(...corrects);
   }
 
   getUser(id) {

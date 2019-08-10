@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/project');
 const User = require('../models/user');
+const Friendrequest = require('../models/friendrequest');
 
 router.get('/', async (req, res, next) => {
   const {field, value} = req.query;
@@ -50,6 +51,7 @@ router.post('/', async (req, res, next) => {
 router.post('/auth/signin', async (req, res, next) => {
   const {email, password} = req.body;
   const {projectId, socketId} = req.session;
+  const socket = req.io.sockets.connected[socketId];
   let user = null;
 
   const project = await Project.findById(projectId).populate({
@@ -64,8 +66,56 @@ router.post('/auth/signin', async (req, res, next) => {
 
   user = project.users[0];
   req.session.userId = user._id;
+  socket.join(user._id);
   req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
   res.send();
 });
+
+router.post('/:id/friendrequests', async (req, res, next) => {
+  const {projectId, socketId, userId: senderId} = req.session;
+  const receiverId = req.params.id;
+
+  const sender = await User.findById(senderId);
+  const receiver = await User.findById(receiverId);
+
+  const friendrequest = new Friendrequest({
+    from: sender._id,
+    to: receiver._id,
+  });
+
+  await friendrequest.save();
+  receiver.friendrequests.push(friendrequest);
+  await receiver.save();
+
+  const friendrequestForClient = await Friendrequest.findById(friendrequest._id)
+    .populate({
+      path: 'from',
+      select: '_id email nickname',
+    })
+    .populate({
+      path: 'to',
+      select: '_id email nickname',
+    })
+    .then();
+  
+  req.io.to(receiverId).emit('friend-requested', friendrequestForClient);
+  res.send();
+});
+
+router.post('/:id/friends/:friendId', async (req, res, next) => {
+  const {behavior} = req.body;
+  const {id, friendId} = req.params;
+  const {userId} = req.session;
+
+  if(userId !== id) return next();
+
+  await User.findByIdAndUpdate(userId, {$pull: {friends: friendId}}).then();
+  await User.findByIdAndUpdate(friendId, {$pull: {friends: userId}}).then();
+
+  req.io.to(userId).emit('friend-removed', friendId);
+  req.io.to(friendId).emit('friend-removed', userId);
+
+  res.send();
+})
 
 module.exports = router;
