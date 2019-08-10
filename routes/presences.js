@@ -5,11 +5,14 @@ const Friendrequest = require('../models/friendrequest');
 
 router.get('/out', async (req, res, next) => {
   const {userId} = req.session;
-  const user = await User.findById(userId)
-    .populate('friends')
-    .then();
+  let user = null;
   
   await User.findByIdAndUpdate(userId, {$set: {isPresent: false}}).then();
+
+  user = await User.findById(userId)
+  .populate('friends')
+  .then();
+  
   user.friends.forEach((friend) => {
     req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());
   })
@@ -21,17 +24,19 @@ router.get('/out', async (req, res, next) => {
 router.post('/in', async (req, res, next) => {
   const {userId, socketId} = req.session;
   const socket = req.io.sockets.connected[socketId];
-  const user = await User.findById(userId)
-    .populate('friends')
-    .populate({
-      path: 'friendrequests',
-      options: {
-        sort: {createdAt: 'ascending'},
-      },
-    })
-    .then();
+  let user = null;
 
   await User.findByIdAndUpdate(userId, {$set: {isPresent: true}}).then();
+
+  user = await User.findById(userId)
+  .populate('friends')
+  .populate({
+    path: 'friendrequests',
+    options: {
+      sort: {createdAt: 'ascending'},
+    },
+  })
+  .then();
 
   user.friends.reduce((promises, friend) => {
     req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());

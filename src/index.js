@@ -26,7 +26,7 @@ window.Messenger = class {
   onUserStateChanged(callback) {
     this.socket.on('user-state-changed', (user) => {
       if(!user) return callback(null);
-      
+
       const currentUser = new CurrentUser({
         user,
         origin: this.origin,
