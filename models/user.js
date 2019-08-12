@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema({
   isPresent: {
     type: Boolean,
     default: false,
-  }
+  },
+  rooms: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Room',
+  }],
 });
 
 userSchema.methods.convertToClientObject = function() {

@@ -1,11 +1,13 @@
 import Friendrequest from './friendrequest';
 import formurlencoded from 'form-urlencoded';
+import Room from './room';
 
 export default class CurrentUser {
   constructor({user, origin, socket}) {
     Object.assign(this, user);
     this.origin = origin;
     this.socket = socket;
+    this.openedRoom = {};
   }
 
   onFriendRequested(callback) {
@@ -36,6 +38,44 @@ export default class CurrentUser {
   onFriendRemoved(callback) {
     this.socket.on('friend-removed', (friendId) => {
       callback(friendId);
+    })
+  }
+
+  onRoomAdded(callback) {
+    this.socket.on('room-added', (room, ack) => {
+      const roomForClient = new Room({
+        room,
+        origin: this.origin,
+      });
+
+      callback(roomForClient);
+      ack && ack();
+    })
+  }
+
+  onMessage(callback) {
+    this.socket.on('message', (message, ack) => {
+      const openedRoom = this.openedRoom[message.room._id];
+
+      if(!openedRoom) return callback(message);
+
+      openedRoom.onMessage(message);
+      ack && ack();
+    })
+  }
+
+  onRoomRemoved(callback) {
+    this.socket.on('room-removed', (room) => {
+      callback(room);
+    })
+  }
+
+  onRoomUserLeft(callback) {
+    this.socket.on('room-user-left', (room, user) => {
+      const openedRoom = this.openedRoom[room._id];
+
+      if(openedRoom) openedRoom.onUserLeft(room, user);
+      callback(room, user);
     })
   }
 
@@ -71,6 +111,54 @@ export default class CurrentUser {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: form,
+    });
+  }
+
+  createRoom(roomOptions) {
+    const data = JSON.stringify(roomOptions);
+
+    return fetch(`${this.origin}/rooms`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    })
+  }
+
+  sendMessage({room, text}) {
+    const body = formurlencoded({
+      text,
+    });
+
+    return fetch(`${this.origin}/rooms/${room._id}/messages`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    })
+  }
+
+  openRoom(room, hooks) {
+    const roomWithHooks = Object.assign({}, room, hooks);
+
+    this.openedRoom[room._id] = roomWithHooks;
+    return fetch(`${this.origin}/rooms/${room._id}/messages`, {
+      credentials: 'include',
+    })
+  }
+
+  closeRoom(room) {
+    room && delete this.openedRoom[room._id];
+  }
+
+  leaveRoom(room) {
+    return fetch(`${this.origin}/users/${this._id}/rooms/${room._id}/leave`, {
+      method: 'POST',
+      credentials: 'include',
     });
   }
 }

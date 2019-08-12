@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Friendrequest = require('../models/friendrequest');
+const Room = require('../models/room');
 
 router.get('/out', async (req, res, next) => {
   const {userId} = req.session;
@@ -36,6 +37,7 @@ router.post('/in', async (req, res, next) => {
       sort: {createdAt: 'ascending'},
     },
   })
+  .populate('rooms')
   .then();
 
   user.friends.reduce((promises, friend) => {
@@ -66,6 +68,23 @@ router.post('/in', async (req, res, next) => {
       return new Promise((resolve) => {
         socket.emit('friend-requested', friendrequestForClient, () => {
           resolve()
+        });
+      });
+    })
+  }, Promise.resolve());
+
+  user.rooms.reduce(async (promises, room) => {
+    const roomForClient = await Room.findById(room._id)
+      .populate({
+        path: 'users',
+        select: '_id email nickname isPresent',
+      })
+      .then();
+
+    return promises.then(() => {
+      return new Promise((resolve) => {
+        socket.emit('room-added', roomForClient, () => {
+          resolve();
         });
       });
     })

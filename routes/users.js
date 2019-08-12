@@ -3,6 +3,8 @@ const router = express.Router();
 const Project = require('../models/project');
 const User = require('../models/user');
 const Friendrequest = require('../models/friendrequest');
+const Room = require('../models/room');
+const Message = require('../models/message');
 
 router.get('/', async (req, res, next) => {
   const {field, value} = req.query;
@@ -117,5 +119,60 @@ router.post('/:id/friends/:friendId', async (req, res, next) => {
 
   res.send();
 })
+
+router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
+  const {id, roomId} = req.params;
+  const {userId, socketId} = req.session;
+  const socket = req.io.sockets.connected[socketId];
+  let leftUser = null;
+  let room = null;
+  let message = null;
+
+  if(id !== userId) return next();
+
+  await User.findByIdAndUpdate(userId, {$pull: {rooms: roomId}}).then();
+  await Room.findByIdAndUpdate(roomId, {$pull: {users: userId}}).then();
+
+  leftUser = await User.findById(userId).then();
+
+  room = await Room.findById(roomId)
+    .populate({
+      path: 'users',
+      select: '_id email nickname isPresent',
+    })
+    .then();
+
+  message = new Message({
+    type: 'leave',
+    room: room._id,
+    sender: leftUser._id,
+  });
+
+  message = await message.save();
+  room.messages.push(message);
+  await room.save()
+
+  message = await Message.findById(message._id)
+    .populate('room')
+    .populate({
+      path: 'sender',
+      select: '_id email nickname isPresent',
+    })
+    .then();
+
+  socket.emit('room-removed', room);
+  room.users.forEach((user) => {
+    req.io.to(user._id).emit('room-user-left', room, leftUser.convertToClientObject());
+    req.io.to(user._id).emit('message', message);
+  });
+
+  // delete room and all messages
+  if(room.users.length === 0) {
+    await Message.deleteMany({room: room._id}).then();
+    await Room.findByIdAndDelete(room._id).then();
+  }
+
+  res.send();
+});
 
 module.exports = router;
