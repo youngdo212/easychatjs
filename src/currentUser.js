@@ -36,8 +36,8 @@ export default class CurrentUser {
   }
 
   onFriendRemoved(callback) {
-    this.socket.on('friend-removed', (friendId) => {
-      callback(friendId);
+    this.socket.on('friend-removed', (friend) => {
+      callback(friend);
     })
   }
 
@@ -100,17 +100,9 @@ export default class CurrentUser {
   }
 
   removeFriend(friendId) {
-    const form = formurlencoded({
-      behavior: 'remove',
-    })
-
-    return fetch(`${this.origin}/users/${this._id}/friends/${friendId}`, {
+    return fetch(`${this.origin}/users/${this._id}/friends/${friendId}/remove`, {
       method: 'POST',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: form,
     });
   }
 

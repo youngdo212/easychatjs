@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Project = require('../models/project');
 const User = require('../models/user');
 const Friendrequest = require('../models/friendrequest');
@@ -104,18 +105,23 @@ router.post('/:id/friendrequests', async (req, res, next) => {
   res.send();
 });
 
-router.post('/:id/friends/:friendId', async (req, res, next) => {
-  const {behavior} = req.body;
+router.post('/:id/friends/:friendId/remove', async (req, res, next) => {
   const {id, friendId} = req.params;
   const {userId} = req.session;
 
   if(userId !== id) return next();
 
-  await User.findByIdAndUpdate(userId, {$pull: {friends: friendId}}).then();
-  await User.findByIdAndUpdate(friendId, {$pull: {friends: userId}}).then();
+  const user = await User.findById(userId).then();
+  const friend = await User.findById(friendId).then();
 
-  req.io.to(userId).emit('friend-removed', friendId);
-  req.io.to(friendId).emit('friend-removed', userId);
+  user.friends = user.friends.filter((eachFriendId) => eachFriendId.toString() !== friendId);
+  friend.friends = friend.friends.filter((eachFriendId) => eachFriendId.toString() !== userId);
+
+  await user.save();
+  await friend.save();
+
+  req.io.to(userId).emit('friend-removed', friend.convertToClientObject());
+  req.io.to(friendId).emit('friend-removed', user.convertToClientObject());
 
   res.send();
 })
