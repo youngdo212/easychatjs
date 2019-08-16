@@ -76,6 +76,10 @@ router.post('/in', async (req, res, next) => {
   user.rooms.reduce(async (promises, room) => {
     const roomForClient = await Room.findById(room._id)
       .populate({
+        path: 'invitedUsers',
+        select: '_id email nickname isPresent',
+      })
+      .populate({
         path: 'users',
         select: '_id email nickname isPresent',
       })
@@ -84,7 +88,7 @@ router.post('/in', async (req, res, next) => {
 
     return promises.then(() => {
       return new Promise((resolve) => {
-        socket.emit('room-added', roomForClient, () => {
+        socket.emit('room-added', roomForClient.convertToClientObject(), () => {
           resolve();
         });
       });

@@ -35,32 +35,41 @@ router.get('/:id/messages', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-  const {userId} = req.session;
-  const {userIds} = req.body;
-  const allUserIds = [userId, ...userIds];
-  const allUserObjectIds = allUserIds.map(id => mongoose.Types.ObjectId(id));
+  const {userId, socketId} = req.session;
+  const {inviteUserIds} = req.body;
+  const inviteUserObjectIds = inviteUserIds.map((inviteUserId) => mongoose.Types.ObjectId(inviteUserId));
+  const socket = req.io.sockets.connected[socketId];
 
-  const room = await new Room({
-    users: allUserIds,
-  });
+  if(!userId) return next();
 
-  await room.save();
+  const user = await User.findById(userId).then();
+  const invitedUsers = await User.find({_id: {$in: inviteUserObjectIds}}).then();
 
-  const users = await User.find({_id: {$in: allUserObjectIds}})
-    .then();
+  let room = await new Room();
+  room = await room.save();
 
-  const roomForClient = await Room.findById(room._id)
+  user.rooms.push(room);
+  await user.save();
+
+  room.users.push(user);
+  invitedUsers.forEach((invitedUser) => {
+    room.invitedUsers.push(invitedUser);
+  })
+
+  room = await room.save();
+  room = await Room.findById(room._id)
+    .populate({
+      path: 'invitedUsers',
+      select: '_id email nickname isPresent'
+    })
     .populate({
       path: 'users',
-      select: '_id email nickname isPresent',
+      select: '_id email nickname isPresent'
     })
+    .populate('lastMessage')
     .then();
 
-  users.forEach((user) => {
-    user.rooms.push(room);
-    user.save();
-    req.io.to(user._id).emit('room-added', roomForClient);
-  });
+  socket.emit('room-added', room.convertToClientObject());
 
   res.send();
 })
@@ -69,14 +78,21 @@ router.post('/:id/messages', async (req, res, next) => {
   const {userId} = req.session;
   const {text} = req.body;
   const {id: roomId} = req.params;
+
   const user = await User.findById(userId).then();
   let room = await Room.findById(roomId)
+    .populate({
+      path: 'invitedUsers',
+      select: '_id email nickname isPresent',
+    })
     .populate({
       path: 'users',
       select: '_id email nickname isPresent',
     })
     .populate('lastMessage')
     .then();
+  const invitedUserObjectIds = room.invitedUsers.map((invitedUser) => invitedUser._id);
+  const invitedUsers = await User.find({_id: {$in: invitedUserObjectIds}}).then()
 
   let message = new Message({
     room: room._id,
@@ -89,6 +105,11 @@ router.post('/:id/messages', async (req, res, next) => {
   room.addMessage(message);
   room = await room.save();
 
+  invitedUsers.forEach((invitedUser) => {
+    invitedUser.rooms.push(room);
+    invitedUser.save();
+  })
+
   message = await Message.findById(message._id)
     .populate({
       path: 'sender',
@@ -97,11 +118,20 @@ router.post('/:id/messages', async (req, res, next) => {
     .populate('room')
     .then();
 
+  room.invitedUsers.forEach((invitedUser) => {
+    req.io.to(invitedUser._id).emit('room-added', room.convertToClientObject());
+    req.io.to(invitedUser._id).emit('message', message);
+  })
+  
   room.users.forEach((user) => {
     req.io.to(user._id).emit('message', message);
-    req.io.to(user._id).emit('room-updated', room);
+    req.io.to(user._id).emit('room-updated', room.convertToClientObject());
   });
 
+  room.users.push(...room.invitedUsers);
+  room.invitedUsers = [];
+  room.save();
+    
   res.send();
 })
 
