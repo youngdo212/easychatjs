@@ -70,12 +70,12 @@ export default class CurrentUser {
     })
   }
 
-  onRoomUserLeft(callback) {
-    this.socket.on('room-user-left', (room, user) => {
+  onRoomUpdated(callback) {
+    this.socket.on('room-updated', (room) => {
       const openedRoom = this.openedRoom[room._id];
 
-      if(openedRoom) openedRoom.onUserLeft(room, user);
-      callback(room, user);
+      if(openedRoom) openedRoom.onUpdate(room);
+      callback(room);
     })
   }
 

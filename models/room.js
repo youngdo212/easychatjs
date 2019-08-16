@@ -9,6 +9,18 @@ const roomSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Message',
   }],
+  lastMessage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message',
+    default: undefined,
+  }
+}, {
+  timestamps: true,
 })
+
+roomSchema.methods.addMessage = function(message) {
+  this.messages.push(message);
+  this.lastMessage = message;
+}
 
 module.exports = new mongoose.model('Room', roomSchema);

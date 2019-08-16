@@ -79,6 +79,7 @@ router.post('/in', async (req, res, next) => {
         path: 'users',
         select: '_id email nickname isPresent',
       })
+      .populate('lastMessage')
       .then();
 
     return promises.then(() => {

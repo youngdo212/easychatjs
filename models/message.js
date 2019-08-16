@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const messageSchema = new mongoose.Schema({
   type: {
     type: String,
-    default: 'text',
+    default: 'text', // join || leave
   },
   room: {
     type: mongoose.Schema.Types.ObjectId,

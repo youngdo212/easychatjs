@@ -146,16 +146,18 @@ router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
       path: 'users',
       select: '_id email nickname isPresent',
     })
+    .populate('lastMessage')
     .then();
 
   message = new Message({
     type: 'leave',
     room: room._id,
     sender: leftUser._id,
+    text: `${leftUser.nickname} has left the room.`
   });
 
   message = await message.save();
-  room.messages.push(message);
+  room.addMessage(message);
   await room.save()
 
   message = await Message.findById(message._id)
@@ -168,7 +170,7 @@ router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
 
   socket.emit('room-removed', room);
   room.users.forEach((user) => {
-    req.io.to(user._id).emit('room-user-left', room, leftUser.convertToClientObject());
+    req.io.to(user._id).emit('room-updated', room);
     req.io.to(user._id).emit('message', message);
   });
 

@@ -11,6 +11,7 @@ router.get('/:id/messages', async (req, res, next) => {
   const socket = req.io.sockets.connected[socketId];
   const room = await Room.findById(roomId)
     .populate('messages')
+    .populate('lastMessage')
     .then();
 
   if(!userId) return next();
@@ -69,7 +70,14 @@ router.post('/:id/messages', async (req, res, next) => {
   const {text} = req.body;
   const {id: roomId} = req.params;
   const user = await User.findById(userId).then();
-  const room = await Room.findById(roomId).then();
+  let room = await Room.findById(roomId)
+    .populate({
+      path: 'users',
+      select: '_id email nickname isPresent',
+    })
+    .populate('lastMessage')
+    .then();
+
   let message = new Message({
     room: room._id,
     sender: user._id,
@@ -78,8 +86,8 @@ router.post('/:id/messages', async (req, res, next) => {
 
   message = await message.save();
 
-  room.messages.push(message);
-  await room.save();
+  room.addMessage(message);
+  room = await room.save();
 
   message = await Message.findById(message._id)
     .populate({
@@ -89,8 +97,9 @@ router.post('/:id/messages', async (req, res, next) => {
     .populate('room')
     .then();
 
-  room.users.forEach((userId) => {
-    req.io.to(userId).emit('message', message);
+  room.users.forEach((user) => {
+    req.io.to(user._id).emit('message', message);
+    req.io.to(user._id).emit('room-updated', room);
   });
 
   res.send();
