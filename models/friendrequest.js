@@ -13,4 +13,4 @@ const friendrequestSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-module.exports = new mongoose.model('Friendrequest', friendrequestSchema);
+module.exports = mongoose.model('Friendrequest', friendrequestSchema);

@@ -6,4 +6,4 @@ const accountSchema = new mongoose.Schema({
   nickname: String,
 });
 
-module.exports = new mongoose.model('Account', accountSchema);
+module.exports = mongoose.model('Account', accountSchema);

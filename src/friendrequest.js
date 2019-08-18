@@ -1,5 +1,5 @@
 export default class Friendrequest {
-  constructor({friendrequest, origin}) {
+  constructor({ friendrequest, origin }) {
     Object.assign(this, friendrequest);
     this.origin = origin;
   }

@@ -1,9 +1,9 @@
-import Friendrequest from './friendrequest';
 import formurlencoded from 'form-urlencoded';
+import Friendrequest from './friendrequest';
 import Room from './room';
 
 export default class CurrentUser {
-  constructor({user, origin, socket}) {
+  constructor({ user, origin, socket }) {
     Object.assign(this, user);
     this.origin = origin;
     this.socket = socket;
@@ -32,13 +32,13 @@ export default class CurrentUser {
   onFriendPresenceChanged(callback) {
     this.socket.on('friend-presence-changed', (user) => {
       callback(user);
-    })
+    });
   }
 
   onFriendRemoved(callback) {
     this.socket.on('friend-removed', (friend) => {
       callback(friend);
-    })
+    });
   }
 
   onRoomAdded(callback) {
@@ -50,33 +50,36 @@ export default class CurrentUser {
 
       callback(roomForClient);
       ack && ack();
-    })
+    });
   }
 
   onMessage(callback) {
     this.socket.on('message', (message, ack) => {
       const openedRoom = this.openedRoom[message.room._id];
 
-      if(!openedRoom) return callback(message);
+      if (!openedRoom) {
+        callback(message);
+        return;
+      }
 
       openedRoom.onMessage(message);
       ack && ack();
-    })
+    });
   }
 
   onRoomRemoved(callback) {
     this.socket.on('room-removed', (room) => {
       callback(room);
-    })
+    });
   }
 
   onRoomUpdated(callback) {
     this.socket.on('room-updated', (room) => {
       const openedRoom = this.openedRoom[room._id];
 
-      if(openedRoom) openedRoom.onUpdate(room);
+      if (openedRoom) openedRoom.onUpdate(room);
       callback(room);
-    })
+    });
   }
 
   connect() {
@@ -89,7 +92,7 @@ export default class CurrentUser {
   disconnect() {
     return fetch(`${this.origin}/presences/out`, {
       credentials: 'include',
-    })
+    });
   }
 
   requestFriend(userId) {
@@ -116,10 +119,10 @@ export default class CurrentUser {
         'Content-Type': 'application/json',
       },
       body: data,
-    })
+    });
   }
 
-  sendMessage({room, text}) {
+  sendMessage({ room, text }) {
     const body = formurlencoded({
       text,
     });
@@ -131,16 +134,16 @@ export default class CurrentUser {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,
-    })
+    });
   }
 
   openRoom(room, hooks) {
-    const roomWithHooks = Object.assign({}, room, hooks);
+    const roomWithHooks = { ...room, ...hooks };
 
     this.openedRoom[room._id] = roomWithHooks;
     return fetch(`${this.origin}/rooms/${room._id}/messages`, {
       credentials: 'include',
-    })
+    });
   }
 
   closeRoom(room) {

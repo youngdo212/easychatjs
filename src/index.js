@@ -3,35 +3,39 @@ import formurlencoded from 'form-urlencoded';
 import CurrentUser from './currentUser';
 
 window.Messenger = class {
-  constructor({apiKey}) {
-    this.origin = 'http://localhost:3000'
+  constructor({ apiKey }) {
+    this.origin = 'http://localhost:3000';
     this.socket = null;
     this.apiKey = apiKey;
   }
-  
+
   async initializeApp() {
     this.socket = io(this.origin);
 
     try {
       // set cookie
-      const response = await fetch(`${this.origin}/projects/${this.apiKey}`, {credentials: 'include'});
+      const response = await fetch(`${this.origin}/projects/${this.apiKey}`, { credentials: 'include' });
 
-      if(!response.ok) throw new Error('api key incorrect');
-
-    } catch(error) {
-      return Promise.reject(error);
+      if (!response.ok) throw new Error('api key incorrect');
+      return undefined;
+    } catch (error) {
+      return error;
     }
   }
 
   onUserStateChanged(callback) {
     this.socket.on('user-state-changed', (user) => {
-      if(!user) return callback(null);
+      if (!user) {
+        callback(null);
+        return;
+      }
 
       const currentUser = new CurrentUser({
         user,
         origin: this.origin,
         socket: this.socket,
       });
+
       callback(currentUser);
     });
   }
@@ -45,12 +49,12 @@ window.Messenger = class {
     });
 
     try {
-      const response1 = await fetch(`${this.origin}/users?field=email&value=${encodedEmail}`, {credentials: 'include'});
+      const response1 = await fetch(`${this.origin}/users?field=email&value=${encodedEmail}`, { credentials: 'include' });
       const users = await response1.json();
 
-      if(users.length) throw new Error('this email has already taken');
+      if (users.length) throw new Error('this email has already taken');
 
-      const response2 = await fetch(`${this.origin}/users`, {
+      return await fetch(`${this.origin}/users`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -59,7 +63,7 @@ window.Messenger = class {
         body: form,
       });
     } catch (error) {
-      return Promise.reject(error);
+      return error;
     }
   }
 
@@ -79,44 +83,30 @@ window.Messenger = class {
         body: form,
       });
 
-      if(!response.ok) throw new Error('wrong email or id');
-
+      if (!response.ok) throw new Error('wrong email or id');
+      return undefined;
     } catch (error) {
-      return Promise.reject(error);
+      return error;
     }
   }
 
   // refactoring
-  async searchUsers(value, {field} = {}) {
+  async searchUsers(value, { field } = {}) {
     const encodedValue = encodeURIComponent(value);
     const fields = field ? [field] : ['email', 'nickname'];
-    const users = [];
+    const promises = [];
+    let users = null;
 
-    for(let i = 0; i < fields.length; i++) {
-      const field = fields[i];
-      const response = await fetch(`${this.origin}/users?field=${field}&value=${encodedValue}`, {credentials: 'include'});
-      const json = await response.json();
+    fields.forEach((eachField) => {
+      const promise = fetch(`${this.origin}/users?field=${eachField}&value=${encodedValue}`, { credentials: 'include' })
+        .then((response) => response.json());
 
-      this.pushWithoutDuplication(users, json);
-    }
-    
-    return users;
-  }
-
-  // refactoring
-  pushWithoutDuplication(sources, targets) {
-    const corrects = [];
-
-    targets.forEach((target) => {
-      if(sources.some((source) => source.email === target.email)) return;
-
-      corrects.push(target);
+      promises.push(promise);
     });
 
-    sources.push(...corrects);
-  }
+    users = await Promise.all(promises);
+    users = users.flat();
 
-  getUser(id) {
-
+    return users.filter((user, index) => (users.findIndex((e) => e.email === user.email) >= index));
   }
-}
+};

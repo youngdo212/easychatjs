@@ -1,39 +1,49 @@
 const express = require('express');
+
 const router = express.Router();
 const Account = require('../models/account');
 
-router.get('/signin', (req, res, next) => {
-  if(req.session.isLogined) return res.redirect('/');
+router.get('/signin', (req, res) => {
+  if (req.session.isLogined) {
+    res.redirect('/');
+    return;
+  }
 
   res.render('signin');
 });
 
-router.get('/signup', (req, res, next) => {
-  if(req.session.isLogined) return res.redirect('/');
+router.get('/signup', (req, res) => {
+  if (req.session.isLogined) {
+    res.redirect('/');
+    return;
+  }
 
   res.render('signup');
 });
 
-router.get('/signout', (req, res, next) => {
+router.get('/signout', (req, res) => {
   req.session.destroy((err) => {
-    if(err) console.err(err);
+    if (err) console.err(err);
 
     res.clearCookie('connect.sid');
     res.redirect('/');
-  })
+  });
 });
 
-router.post('/signin', async (req, res, next) => {
-  const {email, password} = req.body;
+router.post('/signin', async (req, res) => {
+  const { email, password } = req.body;
   const account = await Account.findOne({
     email,
     password,
   }).then();
 
-  if(!account) return res.render('signin', {
-    fail: true,
-    failMessage: 'check your email or password',
-  });
+  if (!account) {
+    res.render('signin', {
+      fail: true,
+      failMessage: 'check your email or password',
+    });
+    return;
+  }
 
   req.session.isLogined = true;
   req.session.accountId = account._id;
@@ -42,16 +52,19 @@ router.post('/signin', async (req, res, next) => {
   res.redirect('/');
 });
 
-router.post('/signup', async (req, res, next) => {
-  const {email, password, nickname} = req.body;
+router.post('/signup', async (req, res) => {
+  const { email, password, nickname } = req.body;
   const isDuplicatedEmail = await Account.findOne({
     email,
   }).then();
 
-  if(isDuplicatedEmail) return res.render('signup', {
-    fail: true,
-    failMessage: 'this email has already taken!'
-  });
+  if (isDuplicatedEmail) {
+    res.render('signup', {
+      fail: true,
+      failMessage: 'this email has already taken!',
+    });
+    return;
+  }
 
   const account = new Account({
     email,
@@ -60,7 +73,7 @@ router.post('/signup', async (req, res, next) => {
   });
 
   account.save((err) => {
-    if(err) console.error(err);
+    if (err) console.error(err);
   });
 
   res.redirect('/auth/signin');

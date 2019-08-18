@@ -26,13 +26,13 @@ const userSchema = new mongoose.Schema({
   }],
 });
 
-userSchema.methods.convertToClientObject = function() {
+userSchema.methods.convertToClientObject = function () {
   return {
     _id: this._id,
     email: this.email,
     nickname: this.nickname,
     isPresent: this.isPresent,
   };
-}
+};
 
-module.exports = new mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema);

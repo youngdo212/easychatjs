@@ -6,12 +6,12 @@ const projectSchema = new mongoose.Schema({
   name: String,
   apiKey: {
     type: String,
-    default: cryptoRandomString.bind(this, {length: 15})
+    default: cryptoRandomString.bind(this, { length: 15 }),
   },
   users: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-  }]
+  }],
 });
 
-module.exports = new mongoose.model('Project', projectSchema);
+module.exports = mongoose.model('Project', projectSchema);

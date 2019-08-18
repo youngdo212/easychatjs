@@ -1,14 +1,14 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 const cors = require('cors');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const io = require('socket.io')();
 
-var indexRouter = require('./routes/index');
+const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
@@ -16,13 +16,13 @@ const presencesRouter = require('./routes/presences');
 const friendrequestsRouter = require('./routes/friendrequests');
 const roomsRouter = require('./routes/rooms');
 
-var app = express();
+const app = express();
 
 // mongoose setup
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', console.log.bind(console, 'mongoose is connected!'));
-mongoose.connect('mongodb://localhost:27017/messengerdb', {useNewUrlParser: true});
+mongoose.connect('mongodb://localhost:27017/messengerdb', { useNewUrlParser: true });
 
 
 // view engine setup
@@ -37,7 +37,7 @@ const sessionMiddleware = session({
   cookie: {
     httpOnly: true,
     secure: false, // change to true, if using https
-  }
+  },
 });
 app.use(sessionMiddleware);
 
@@ -70,12 +70,12 @@ app.use('/friendrequests', friendrequestsRouter);
 app.use('/rooms', roomsRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -90,8 +90,8 @@ io.on('connection', (socket) => {
 
   socket.request.session.socketId = socket.id;
   socket.request.session.save((error) => {
-    if(error) console.error(error);
+    if (error) console.error(error);
   });
-})
+});
 
 module.exports = app;

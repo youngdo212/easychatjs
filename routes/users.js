@@ -1,15 +1,15 @@
 const express = require('express');
+
 const router = express.Router();
-const mongoose = require('mongoose');
 const Project = require('../models/project');
 const User = require('../models/user');
 const Friendrequest = require('../models/friendrequest');
 const Room = require('../models/room');
 const Message = require('../models/message');
 
-router.get('/', async (req, res, next) => {
-  const {field, value} = req.query;
-  const projectId = req.session.projectId;
+router.get('/', async (req, res) => {
+  const { field, value } = req.query;
+  const { projectId } = req.session;
   const decodedValue = decodeURIComponent(value);
   const match = /^\/.*\/$/.test(decodedValue) ? new RegExp(decodedValue.slice(1, -1)) : decodedValue;
   const filter = {};
@@ -21,13 +21,13 @@ router.get('/', async (req, res, next) => {
     path: 'users',
     match: filter,
   }).then();
-  
-  res.send(project.users.map(user => user.convertToClientObject()));
+
+  res.send(project.users.map((user) => user.convertToClientObject()));
 });
 
 router.post('/', async (req, res, next) => {
-  const {email, password, nickname} = req.body;
-  const {projectId, socketId} = req.session;
+  const { email, password, nickname } = req.body;
+  const { projectId, socketId } = req.session;
 
   const project = await Project.findById(projectId).then();
 
@@ -36,7 +36,7 @@ router.post('/', async (req, res, next) => {
     email,
     password,
     nickname,
-  })
+  });
 
   try {
     user = await user.save().then();
@@ -45,15 +45,15 @@ router.post('/', async (req, res, next) => {
     req.session.userId = user._id;
     req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
     res.send();
-  } catch(error) {
+  } catch (error) {
     console.error(error);
     next();
   }
 });
 
 router.post('/auth/signin', async (req, res, next) => {
-  const {email, password} = req.body;
-  const {projectId, socketId} = req.session;
+  const { email, password } = req.body;
+  const { projectId, socketId } = req.session;
   const socket = req.io.sockets.connected[socketId];
   let user = null;
 
@@ -65,17 +65,20 @@ router.post('/auth/signin', async (req, res, next) => {
     },
   }).then();
 
-  if(!project.users.length) return next();
+  if (!project.users.length) {
+    next();
+    return;
+  }
 
-  user = project.users[0];
+  [user] = project.users;
   req.session.userId = user._id;
   socket.join(user._id);
   req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
   res.send();
 });
 
-router.post('/:id/friendrequests', async (req, res, next) => {
-  const {projectId, socketId, userId: senderId} = req.session;
+router.post('/:id/friendrequests', async (req, res) => {
+  const { userId: senderId } = req.session;
   const receiverId = req.params.id;
 
   const sender = await User.findById(senderId);
@@ -100,16 +103,19 @@ router.post('/:id/friendrequests', async (req, res, next) => {
       select: '_id email nickname isPresent',
     })
     .then();
-  
+
   req.io.to(receiverId).emit('friend-requested', friendrequestForClient);
   res.send();
 });
 
 router.post('/:id/friends/:friendId/remove', async (req, res, next) => {
-  const {id, friendId} = req.params;
-  const {userId} = req.session;
+  const { id, friendId } = req.params;
+  const { userId } = req.session;
 
-  if(userId !== id) return next();
+  if (userId !== id) {
+    next();
+    return;
+  }
 
   const user = await User.findById(userId).then();
   const friend = await User.findById(friendId).then();
@@ -124,20 +130,23 @@ router.post('/:id/friends/:friendId/remove', async (req, res, next) => {
   req.io.to(friendId).emit('friend-removed', user.convertToClientObject());
 
   res.send();
-})
+});
 
 router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
-  const {id, roomId} = req.params;
-  const {userId, socketId} = req.session;
+  const { id, roomId } = req.params;
+  const { userId, socketId } = req.session;
   const socket = req.io.sockets.connected[socketId];
   let leftUser = null;
   let room = null;
   let message = null;
 
-  if(id !== userId) return next();
+  if (id !== userId) {
+    next();
+    return;
+  }
 
-  await User.findByIdAndUpdate(userId, {$pull: {rooms: roomId}}).then();
-  await Room.findByIdAndUpdate(roomId, {$pull: {users: userId}}).then();
+  await User.findByIdAndUpdate(userId, { $pull: { rooms: roomId } }).then();
+  await Room.findByIdAndUpdate(roomId, { $pull: { users: userId } }).then();
 
   leftUser = await User.findById(userId).then();
 
@@ -153,12 +162,12 @@ router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
     type: 'leave',
     room: room._id,
     sender: leftUser._id,
-    text: `${leftUser.nickname} has left the room.`
+    text: `${leftUser.nickname} has left the room.`,
   });
 
   message = await message.save();
   room.addMessage(message);
-  await room.save()
+  await room.save();
 
   message = await Message.findById(message._id)
     .populate('room')
@@ -175,8 +184,8 @@ router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
   });
 
   // delete room and all messages
-  if(room.users.length === 0) {
-    await Message.deleteMany({room: room._id}).then();
+  if (room.users.length === 0) {
+    await Message.deleteMany({ room: room._id }).then();
     await Room.findByIdAndDelete(room._id).then();
   }
 

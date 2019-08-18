@@ -17,26 +17,26 @@ const roomSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Message',
     default: undefined,
-  }
+  },
 }, {
   timestamps: true,
-})
+});
 
-roomSchema.methods.addMessage = function(message) {
+roomSchema.methods.addMessage = function (message) {
   this.messages.push(message);
   this.lastMessage = message;
-}
+};
 
-roomSchema.methods.convertToClientObject = function() {
+roomSchema.methods.convertToClientObject = function () {
   const clientObject = {};
 
   clientObject._id = this._id;
   clientObject.createdAt = this.createdAt;
   clientObject.lastMessage = this.lastMessage;
   clientObject.messages = this.messages;
-  clientObject.users = [...this.invitedUsers, ... this.users];
+  clientObject.users = [...this.invitedUsers, ...this.users];
 
   return clientObject;
-}
+};
 
-module.exports = new mongoose.model('Room', roomSchema);
+module.exports = mongoose.model('Room', roomSchema);
