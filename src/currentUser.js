@@ -75,10 +75,14 @@ export default class CurrentUser {
 
   onRoomUpdated(callback) {
     this.socket.on('room-updated', (room) => {
+      const roomForClient = new Room({
+        room,
+        origin: this.origin,
+      });
       const openedRoom = this.openedRoom[room._id];
 
-      if (openedRoom) openedRoom.onUpdate(room);
-      callback(room);
+      if (openedRoom) openedRoom.onUpdate(roomForClient);
+      callback(roomForClient);
     });
   }
 
