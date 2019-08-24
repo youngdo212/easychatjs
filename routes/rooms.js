@@ -140,4 +140,49 @@ router.post('/:id/messages', async (req, res) => {
   res.send();
 });
 
+router.post('/:id/users', async (req, res) => {
+  const { id: roomId } = req.params;
+  const { userId } = req.body;
+  const user = await User.findById(userId).then();
+  let room = await Room.findById(roomId)
+    .populate({
+      path: 'invitedUsers',
+      select: '_id email nickname isPresent',
+    })
+    .populate({
+      path: 'users',
+      select: '_id email nickname isPresent',
+    })
+    .populate('lastMessage')
+    .then();
+
+  let message = new Message({
+    type: 'join',
+    room: room._id,
+    sender: user._id,
+    text: `${user.nickname} has joined the room.`,
+  });
+
+  message = await message.save();
+
+  room.invitedUsers.push(user);
+  room.addMessage(message);
+  room = await room.save();
+
+  message = await Message.findById(message._id)
+    .populate({
+      path: 'sender',
+      select: '_id email nickname isPresent',
+    })
+    .populate('room')
+    .then();
+
+  room.users.forEach((userInRoom) => {
+    req.io.to(userInRoom._id).emit('room-updated', room.convertToClientObject());
+    req.io.to(userInRoom._id).emit('message', message);
+  });
+
+  res.send();
+});
+
 module.exports = router;
