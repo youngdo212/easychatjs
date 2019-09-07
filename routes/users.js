@@ -44,7 +44,7 @@ router.post('/', async (req, res, next) => {
     await project.save().then();
     req.session.userId = user._id;
     req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
-    res.send();
+    res.send(user.convertToClientObject());
   } catch (error) {
     console.error(error);
     next();
@@ -74,7 +74,7 @@ router.post('/auth/signin', async (req, res, next) => {
   req.session.userId = user._id;
   socket.join(user._id);
   req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
-  res.send();
+  res.send(user.convertToClientObject());
 });
 
 router.post('/:id/friendrequests', async (req, res) => {

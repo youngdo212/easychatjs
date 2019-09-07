@@ -48,23 +48,28 @@ window.Messenger = class {
       nickname,
     });
 
-    try {
-      const response1 = await fetch(`${this.origin}/users?field=email&value=${encodedEmail}`, { credentials: 'include' });
-      const users = await response1.json();
+    const response1 = await fetch(`${this.origin}/users?field=email&value=${encodedEmail}`, { credentials: 'include' });
+    const users = await response1.json();
 
-      if (users.length) throw new Error('this email has already taken');
+    if (users.length) throw new Error('this email has already taken');
 
-      return await fetch(`${this.origin}/users`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: form,
-      });
-    } catch (error) {
-      return error;
-    }
+    const response2 = await fetch(`${this.origin}/users`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: form,
+    });
+
+    const user = await response2.json();
+    const currentUser = new CurrentUser({
+      user,
+      origin: this.origin,
+      socket: this.socket,
+    });
+
+    return currentUser;
   }
 
   async signIn(email, password) {
@@ -73,21 +78,25 @@ window.Messenger = class {
       password,
     });
 
-    try {
-      const response = await fetch(`${this.origin}/users/auth/signin`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: form,
-      });
+    const response = await fetch(`${this.origin}/users/auth/signin`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: form,
+    });
 
-      if (!response.ok) throw new Error('wrong email or id');
-      return undefined;
-    } catch (error) {
-      return error;
-    }
+    if (!response.ok) throw new Error('wrong email or id');
+
+    const user = await response.json();
+    const currentUser = new CurrentUser({
+      user,
+      origin: this.origin,
+      socket: this.socket,
+    });
+
+    return currentUser;
   }
 
   // refactoring
