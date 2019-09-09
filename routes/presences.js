@@ -32,12 +32,6 @@ router.post('/in', async (req, res) => {
 
   user = await User.findById(userId)
     .populate('friends')
-    .populate({
-      path: 'friendrequests',
-      options: {
-        sort: { createdAt: 'ascending' },
-      },
-    })
     .populate('rooms')
     .then();
 
@@ -46,25 +40,6 @@ router.post('/in', async (req, res) => {
 
     return promises.then(() => new Promise((resolve) => {
       socket.emit('friend-added', friend.convertToClientObject(), () => {
-        resolve();
-      });
-    }));
-  }, Promise.resolve());
-
-  user.friendrequests.reduce(async (promises, friendrequest) => {
-    const friendrequestForClient = await Friendrequest.findById(friendrequest._id)
-      .populate({
-        path: 'from',
-        select: '_id email nickname isPresent',
-      })
-      .populate({
-        path: 'to',
-        select: '_id email nickname isPresent',
-      })
-      .then();
-
-    return promises.then(() => new Promise((resolve) => {
-      socket.emit('friend-requested', friendrequestForClient, () => {
         resolve();
       });
     }));

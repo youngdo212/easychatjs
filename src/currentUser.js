@@ -1,5 +1,4 @@
 import formurlencoded from 'form-urlencoded';
-import Friendrequest from './friendrequest';
 import Room from './room';
 
 export default class CurrentUser {
@@ -11,14 +10,8 @@ export default class CurrentUser {
   }
 
   onFriendRequested(callback) {
-    this.socket.on('friend-requested', (friendrequest, ack) => {
-      const friendrequestForClient = new Friendrequest({
-        friendrequest,
-        origin: this.origin,
-      });
-
-      callback(friendrequestForClient);
-      ack && ack();
+    this.socket.on('friend-requested', (friendrequest) => {
+      callback(friendrequest);
     });
   }
 
@@ -102,6 +95,12 @@ export default class CurrentUser {
   requestFriend(userId) {
     return fetch(`${this.origin}/users/${userId}/friendrequests`, {
       method: 'POST',
+      credentials: 'include',
+    });
+  }
+
+  responseFriendrequest(id, answer) {
+    return fetch(`${this.origin}/friendrequests/${id}/${answer}`, {
       credentials: 'include',
     });
   }

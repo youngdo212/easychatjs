@@ -7,4 +7,5 @@ module.exports = {
     filename: 'messenger.js',
     path: path.resolve(__dirname, 'public/sdk'),
   },
+  watch: true,
 };

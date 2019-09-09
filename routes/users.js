@@ -57,13 +57,14 @@ router.post('/auth/signin', async (req, res, next) => {
   const socket = req.io.sockets.connected[socketId];
   let user = null;
 
-  const project = await Project.findById(projectId).populate({
-    path: 'users',
-    match: {
-      email,
-      password,
-    },
-  }).then();
+  const project = await Project.findById(projectId)
+    .populate({
+      path: 'users',
+      match: {
+        email,
+        password,
+      },
+    }).then();
 
   if (!project.users.length) {
     next();
@@ -71,10 +72,25 @@ router.post('/auth/signin', async (req, res, next) => {
   }
 
   [user] = project.users;
+
+  user = await User.findById(user._id)
+    .populate({
+      path: 'friendrequests',
+      populate: { path: 'from to' },
+    })
+    .populate({
+      path: 'friends',
+    })
+    .populate({
+      path: 'rooms',
+      populate: { path: 'users invitedUsers' },
+    })
+    .then();
+
   req.session.userId = user._id;
   socket.join(user._id);
   req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
-  res.send(user.convertToClientObject());
+  res.send(user.convertToCurrentUserObject());
 });
 
 router.post('/:id/friendrequests', async (req, res) => {

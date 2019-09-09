@@ -22,12 +22,12 @@ const roomSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-roomSchema.methods.addMessage = function (message) {
+roomSchema.methods.addMessage = function addMessage(message) {
   this.messages.push(message);
   this.lastMessage = message;
 };
 
-roomSchema.methods.convertToClientObject = function () {
+roomSchema.methods.convertToClientObject = function convertToClientObject() {
   const clientObject = {};
 
   clientObject._id = this._id;
