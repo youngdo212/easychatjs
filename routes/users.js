@@ -25,6 +25,26 @@ router.get('/', async (req, res) => {
   res.send(project.users.map((user) => user.convertToClientObject()));
 });
 
+router.get('/auth/signout', async (req, res) => {
+  const { userId, socketId } = req.session;
+  const socket = req.io.sockets.connected[socketId];
+  let user = null;
+
+  await User.findByIdAndUpdate(userId, { $set: { isPresent: false } }).then();
+
+  user = await User.findById(userId)
+    .populate('friends')
+    .then();
+
+  user.friends.forEach((friend) => {
+    req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());
+  });
+
+  req.session.userId = '';
+  socket.leave(userId);
+  res.send();
+});
+
 router.post('/', async (req, res, next) => {
   const { email, password, nickname } = req.body;
   const { projectId, socketId } = req.session;
@@ -73,6 +93,9 @@ router.post('/auth/signin', async (req, res, next) => {
 
   [user] = project.users;
 
+  // update present state
+  await User.findByIdAndUpdate(user._id, { $set: { isPresent: true } }).then();
+
   user = await User.findById(user._id)
     .populate({
       path: 'friendrequests',
@@ -86,6 +109,10 @@ router.post('/auth/signin', async (req, res, next) => {
       populate: { path: 'users invitedUsers' },
     })
     .then();
+
+  user.friends.forEach((friend) => {
+    req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());
+  });
 
   req.session.userId = user._id;
   socket.join(user._id);

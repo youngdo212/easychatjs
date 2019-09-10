@@ -79,19 +79,6 @@ export default class CurrentUser {
     });
   }
 
-  connect() {
-    return fetch(`${this.origin}/presences/in`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-  }
-
-  disconnect() {
-    return fetch(`${this.origin}/presences/out`, {
-      credentials: 'include',
-    });
-  }
-
   requestFriend(userId) {
     return fetch(`${this.origin}/users/${userId}/friendrequests`, {
       method: 'POST',

@@ -12,7 +12,6 @@ const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
-const presencesRouter = require('./routes/presences');
 const friendrequestsRouter = require('./routes/friendrequests');
 const roomsRouter = require('./routes/rooms');
 
@@ -65,7 +64,6 @@ app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/projects', projectsRouter);
 app.use('/users', usersRouter);
-app.use('/presences', presencesRouter);
 app.use('/friendrequests', friendrequestsRouter);
 app.use('/rooms', roomsRouter);
 

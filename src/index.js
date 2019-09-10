@@ -99,6 +99,14 @@ window.Messenger = class {
     return currentUser;
   }
 
+  async signOut() {
+    return fetch(`${this.origin}/users/auth/signout`, {
+      credentials: 'include',
+    }).then(() => {
+      this.socket.off();
+    });
+  }
+
   // refactoring
   async searchUsers(value, { field } = {}) {
     const encodedValue = encodeURIComponent(value);
