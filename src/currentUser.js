@@ -16,9 +16,8 @@ export default class CurrentUser {
   }
 
   onFriendAdded(callback) {
-    this.socket.on('friend-added', (friend, ack) => {
+    this.socket.on('friend-added', (friend) => {
       callback(friend);
-      ack && ack();
     });
   }
 

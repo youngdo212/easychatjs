@@ -107,7 +107,7 @@ window.Messenger = class {
     });
   }
 
-  // refactoring
+  // deprecated
   async searchUsers(value, { field } = {}) {
     const encodedValue = encodeURIComponent(value);
     const fields = field ? [field] : ['email', 'nickname'];
@@ -125,5 +125,11 @@ window.Messenger = class {
     users = users.flat();
 
     return users.filter((user, index) => (users.findIndex((e) => e.email === user.email) >= index));
+  }
+
+  async getUsers(field, value) {
+    const encodedValue = encodeURIComponent(value);
+    return fetch(`${this.origin}/users?field=${field}&value=${encodedValue}`, { credentials: 'include' })
+      .then((response) => response.json());
   }
 };
