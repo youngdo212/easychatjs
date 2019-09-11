@@ -109,6 +109,18 @@ export default class CurrentUser {
     return friends.sort((a, b) => (order === 'asc' ? a[property] - b[property] : b[property] - a[property]));
   }
 
+  /**
+   * get current user's rooms
+   */
+  async getRooms() {
+    const response = await fetch(`${this.origin}/users/${this._id}/rooms`, { credentials: 'include' });
+    const rooms = await response.json();
+
+    rooms.sort((roomA, roomB) => new Date(roomB.updatedAt) - new Date(roomA.updatedAt));
+
+    return rooms;
+  }
+
   removeFriend(friendId) {
     return fetch(`${this.origin}/users/${this._id}/friends/${friendId}/remove`, {
       method: 'POST',
@@ -126,7 +138,7 @@ export default class CurrentUser {
         'Content-Type': 'application/json',
       },
       body: data,
-    });
+    }).then((response) => response.json());
   }
 
   sendMessage({ room, text }) {

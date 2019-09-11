@@ -65,18 +65,16 @@ router.post('/', async (req, res, next) => {
   room = await Room.findById(room._id)
     .populate({
       path: 'invitedUsers',
-      select: '_id email nickname isPresent',
     })
     .populate({
       path: 'users',
-      select: '_id email nickname isPresent',
     })
     .populate('lastMessage')
     .then();
 
   socket.emit('room-added', room.convertToClientObject());
 
-  res.send();
+  res.send(room.convertToClientObject());
 });
 
 router.post('/:id/messages', async (req, res) => {

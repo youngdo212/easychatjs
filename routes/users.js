@@ -35,6 +35,19 @@ router.get('/:id/friends', async (req, res) => {
   res.send(friends);
 });
 
+router.get('/:id/rooms', async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id)
+    .populate({
+      path: 'rooms',
+      populate: 'invitedUsers users lastMessage',
+    })
+    .then();
+  const rooms = user.rooms.map((room) => room.convertToClientObject());
+
+  res.send(rooms);
+});
+
 router.get('/auth/signout', async (req, res) => {
   const { userId, socketId } = req.session;
   const socket = req.io.sockets.connected[socketId];
@@ -111,11 +124,6 @@ router.post('/auth/signin', async (req, res, next) => {
     .populate({
       path: 'friendrequests',
       populate: { path: 'from to' },
-    })
-    // will be removed
-    .populate({
-      path: 'rooms',
-      populate: { path: 'users invitedUsers' },
     })
     .then();
 

@@ -29,12 +29,15 @@ roomSchema.methods.addMessage = function addMessage(message) {
 
 roomSchema.methods.convertToClientObject = function convertToClientObject() {
   const clientObject = {};
+  const invitedUsers = this.invitedUsers.map((invitedUser) => invitedUser.convertToClientObject());
+  const users = this.users.map((user) => user.convertToClientObject());
 
   clientObject._id = this._id;
   clientObject.createdAt = this.createdAt;
+  clientObject.updatedAt = this.updatedAt;
   clientObject.lastMessage = this.lastMessage;
   clientObject.messages = this.messages;
-  clientObject.users = [...this.invitedUsers, ...this.users];
+  clientObject.users = [...invitedUsers, ...users];
 
   return clientObject;
 };

@@ -15,11 +15,6 @@ router.get('/:apiKey', async (req, res, next) => {
       path: 'friendrequests',
       populate: { path: 'from to' },
     })
-    // will be removed
-    .populate({
-      path: 'rooms',
-      populate: { path: 'users invitedUsers' },
-    })
     .then();
 
   if (!project) {

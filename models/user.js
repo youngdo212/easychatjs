@@ -46,11 +46,6 @@ userSchema.methods.convertToCurrentUserObject = function convertToCurrentUserObj
       friendrequest.to = friendrequest.to.convertToClientObject();
       return friendrequest;
     }),
-    rooms: this.rooms.map((room) => room.convertToClientObject())
-      .map((room) => {
-        room.users = room.users.map((user) => user.convertToClientObject());
-        return room;
-      }),
   };
 };
 
