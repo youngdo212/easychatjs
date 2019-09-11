@@ -12,15 +12,22 @@ window.Messenger = class {
   async initializeApp() {
     this.socket = io(this.origin);
 
-    try {
-      // set cookie
-      const response = await fetch(`${this.origin}/projects/${this.apiKey}`, { credentials: 'include' });
+    // set and check cookie
+    const response = await fetch(`${this.origin}/projects/${this.apiKey}`, { credentials: 'include' });
 
-      if (!response.ok) throw new Error('api key incorrect');
-      return undefined;
-    } catch (error) {
-      return error;
-    }
+    if (!response.ok) throw new Error('api key incorrect');
+
+    const user = await response.json();
+
+    if (!user) return user;
+
+    const currentUser = new CurrentUser({
+      user,
+      origin: this.origin,
+      socket: this.socket,
+    });
+
+    return currentUser;
   }
 
   onUserStateChanged(callback) {

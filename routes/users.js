@@ -107,13 +107,12 @@ router.post('/auth/signin', async (req, res, next) => {
   await User.findByIdAndUpdate(user._id, { $set: { isPresent: true } }).then();
 
   user = await User.findById(user._id)
+    // will be removed
     .populate({
       path: 'friendrequests',
       populate: { path: 'from to' },
     })
-    .populate({
-      path: 'friends',
-    })
+    // will be removed
     .populate({
       path: 'rooms',
       populate: { path: 'users invitedUsers' },
