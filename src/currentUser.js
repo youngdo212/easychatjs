@@ -91,11 +91,29 @@ export default class CurrentUser {
     });
   }
 
+  /**
+   * @param {Object} [sortOption]
+   * @param {string} [sortOption.email] 'asc' | 'desc'
+   * @param {string} [sortOption.nickname] 'asc' | 'desc'
+   * @param {string} [sortOption.isPresent] 'asc' | 'desc'
+   */
+  async getFriends(sortOption) {
+    const response = await fetch(`${this.origin}/users/${this._id}/friends`, { credentials: 'include' });
+    const friends = await response.json();
+
+    if (!sortOption) return friends;
+
+    const [sortEntry] = Object.entries(sortOption);
+    const [property, order] = sortEntry;
+
+    return friends.sort((a, b) => (order === 'asc' ? a[property] - b[property] : b[property] - a[property]));
+  }
+
   removeFriend(friendId) {
     return fetch(`${this.origin}/users/${this._id}/friends/${friendId}/remove`, {
       method: 'POST',
       credentials: 'include',
-    });
+    }).then((response) => response.json());
   }
 
   createRoom(roomOptions) {

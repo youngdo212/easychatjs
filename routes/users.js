@@ -25,6 +25,16 @@ router.get('/', async (req, res) => {
   res.send(project.users.map((user) => user.convertToClientObject()));
 });
 
+router.get('/:id/friends', async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id)
+    .populate('friends')
+    .then();
+  const friends = user.friends.map((friend) => friend.convertToClientObject());
+
+  res.send(friends);
+});
+
 router.get('/auth/signout', async (req, res) => {
   const { userId, socketId } = req.session;
   const socket = req.io.sockets.connected[socketId];
@@ -172,7 +182,7 @@ router.post('/:id/friends/:friendId/remove', async (req, res, next) => {
   req.io.to(userId).emit('friend-removed', friend.convertToClientObject());
   req.io.to(friendId).emit('friend-removed', user.convertToClientObject());
 
-  res.send();
+  res.send(friend.convertToClientObject());
 });
 
 router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
