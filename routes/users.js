@@ -192,6 +192,36 @@ router.post('/:id/friends/:friendId/remove', async (req, res, next) => {
   res.send(friend.convertToClientObject());
 });
 
+router.post('/:id/rooms/:roomId/open', async (req, res, next) => {
+  const { userId, socketId } = req.session;
+  const { id, roomId } = req.params;
+  const socket = req.io.sockets.connected[socketId];
+  const room = await Room.findById(roomId)
+    .populate('messages')
+    .populate('lastMessage')
+    .then();
+
+  if (userId !== id) {
+    next();
+    return;
+  }
+
+  room.messages.reduce(async (promises, message) => {
+    const messageForClient = await Message.findById(message._id)
+      .populate('room')
+      .populate('sender')
+      .then();
+
+    return promises.then(() => new Promise((resolve) => {
+      socket.emit('message', messageForClient, () => {
+        resolve();
+      });
+    }));
+  }, Promise.resolve());
+
+  res.send();
+});
+
 router.post('/:id/rooms/:roomId/leave', async (req, res, next) => {
   const { id, roomId } = req.params;
   const { userId, socketId } = req.session;

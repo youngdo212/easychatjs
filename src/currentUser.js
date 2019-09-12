@@ -6,7 +6,7 @@ export default class CurrentUser {
     Object.assign(this, user);
     this.origin = origin;
     this.socket = socket;
-    this.openedRoom = {};
+    this.openedRooms = {};
   }
 
   onFriendRequested(callback) {
@@ -47,14 +47,14 @@ export default class CurrentUser {
 
   onMessage(callback) {
     this.socket.on('message', (message, ack) => {
-      const openedRoom = this.openedRoom[message.room._id];
+      const openedRoom = this.openedRooms[message.room._id];
 
       if (!openedRoom) {
         callback(message);
         return;
       }
 
-      openedRoom.onMessage(message);
+      openedRoom.hooks.onMessage(message);
       ack && ack();
     });
   }
@@ -71,7 +71,7 @@ export default class CurrentUser {
         room,
         origin: this.origin,
       });
-      const openedRoom = this.openedRoom[room._id];
+      const openedRoom = this.openedRooms[room._id];
 
       if (openedRoom) openedRoom.onUpdate(roomForClient);
       callback(roomForClient);
@@ -141,12 +141,12 @@ export default class CurrentUser {
     }).then((response) => response.json());
   }
 
-  sendMessage({ room, text }) {
+  sendMessage({ roomId, text }) {
     const body = formurlencoded({
       text,
     });
 
-    return fetch(`${this.origin}/rooms/${room._id}/messages`, {
+    return fetch(`${this.origin}/rooms/${roomId}/messages`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -156,17 +156,20 @@ export default class CurrentUser {
     });
   }
 
-  openRoom(room, hooks) {
-    const roomWithHooks = { ...room, ...hooks };
+  openRoom({ roomId, hooks }) {
+    this.openedRooms[roomId] = {
+      id: roomId,
+      hooks,
+    };
 
-    this.openedRoom[room._id] = roomWithHooks;
-    return fetch(`${this.origin}/rooms/${room._id}/messages`, {
+    return fetch(`${this.origin}/users/${this._id}/rooms/${roomId}/open`, {
+      method: 'POST',
       credentials: 'include',
     });
   }
 
-  closeRoom(room) {
-    room && delete this.openedRoom[room._id];
+  closeRoom(roomId) {
+    roomId && delete this.openedRooms[roomId];
   }
 
   leaveRoom(room) {
