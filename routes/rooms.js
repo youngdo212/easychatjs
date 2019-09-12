@@ -6,6 +6,17 @@ const Room = require('../models/room');
 const User = require('../models/user');
 const Message = require('../models/message');
 
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  const room = await Room.findById(id)
+    .populate('invitedUsers')
+    .populate('users')
+    .populate('lastMessage')
+    .then();
+
+  res.send(room.convertToClientObject());
+});
+
 router.get('/:id/messages', async (req, res, next) => {
   const { userId, socketId } = req.session;
   const { id: roomId } = req.params;

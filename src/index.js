@@ -139,4 +139,11 @@ window.Messenger = class {
     return fetch(`${this.origin}/users?field=${field}&value=${encodedValue}`, { credentials: 'include' })
       .then((response) => response.json());
   }
+
+  async getRoom(id) {
+    const response = await fetch(`${this.origin}/rooms/${id}`, { credentials: 'include' });
+    const room = await response.json();
+
+    return room;
+  }
 };
