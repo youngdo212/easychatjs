@@ -71,9 +71,9 @@ export default class CurrentUser {
         room,
         origin: this.origin,
       });
-      // const openedRoom = this.openedRooms[room._id];
+      const openedRoom = this.openedRooms[room._id];
 
-      // if (openedRoom) openedRoom.hooks.onUpdate(roomForClient);
+      if (openedRoom) openedRoom.hooks.onUpdate(roomForClient);
       callback(roomForClient);
     });
   }
