@@ -9,13 +9,7 @@ router.get('/:apiKey', async (req, res, next) => {
   const { userId, socketId } = req.session;
   const socket = req.io.sockets.connected[socketId];
   const project = await Project.findOne({ apiKey });
-  const user = await User.findById(userId)
-    // will be removed
-    .populate({
-      path: 'friendrequests',
-      populate: { path: 'from to' },
-    })
-    .then();
+  const user = await User.findById(userId).then();
 
   if (!project) {
     next();
@@ -24,7 +18,7 @@ router.get('/:apiKey', async (req, res, next) => {
 
   req.session.projectId = project._id;
   userId && socket.join(userId);
-  res.send(user ? user.convertToCurrentUserObject() : null);
+  res.send(user ? user.convertToClientObject() : null);
 });
 
 router.post('/', (req, res) => {

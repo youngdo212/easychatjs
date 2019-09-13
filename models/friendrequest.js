@@ -13,4 +13,13 @@ const friendrequestSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+friendrequestSchema.methods.convertToClientObject = function convertToClientObject() {
+  return {
+    _id: this._id,
+    from: this.from.convertToClientObject(),
+    to: this.to.convertToClientObject(),
+    createdAt: this.createdAt,
+  };
+};
+
 module.exports = mongoose.model('Friendrequest', friendrequestSchema);

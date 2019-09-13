@@ -92,6 +92,16 @@ export default class CurrentUser {
   }
 
   /**
+   * get current user's friendrequests
+   */
+  async getFriendrequests() {
+    const response = await fetch(`${this.origin}/users/${this._id}/friendrequests`, { credentials: 'include' });
+    const friendrequests = await response.json();
+
+    return friendrequests;
+  }
+
+  /**
    * @param {Object} [sortOption]
    * @param {string} [sortOption.email] 'asc' | 'desc'
    * @param {string} [sortOption.nickname] 'asc' | 'desc'

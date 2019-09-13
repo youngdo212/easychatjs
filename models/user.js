@@ -35,18 +35,4 @@ userSchema.methods.convertToClientObject = function convertToClientObject() {
   };
 };
 
-userSchema.methods.convertToCurrentUserObject = function convertToCurrentUserObject() {
-  return {
-    _id: this._id,
-    email: this.email,
-    nickname: this.nickname,
-    isPresent: this.isPresent,
-    friendrequests: this.friendrequests.map((friendrequest) => {
-      friendrequest.from = friendrequest.from.convertToClientObject();
-      friendrequest.to = friendrequest.to.convertToClientObject();
-      return friendrequest;
-    }),
-  };
-};
-
 module.exports = mongoose.model('User', userSchema);
