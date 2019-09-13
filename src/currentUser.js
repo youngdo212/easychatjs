@@ -71,9 +71,9 @@ export default class CurrentUser {
         room,
         origin: this.origin,
       });
-      const openedRoom = this.openedRooms[room._id];
+      // const openedRoom = this.openedRooms[room._id];
 
-      if (openedRoom) openedRoom.onUpdate(roomForClient);
+      // if (openedRoom) openedRoom.hooks.onUpdate(roomForClient);
       callback(roomForClient);
     });
   }
@@ -172,8 +172,8 @@ export default class CurrentUser {
     roomId && delete this.openedRooms[roomId];
   }
 
-  leaveRoom(room) {
-    return fetch(`${this.origin}/users/${this._id}/rooms/${room._id}/leave`, {
+  leaveRoom(roomId) {
+    return fetch(`${this.origin}/users/${this._id}/rooms/${roomId}/leave`, {
       method: 'POST',
       credentials: 'include',
     });
