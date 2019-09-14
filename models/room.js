@@ -27,6 +27,20 @@ roomSchema.methods.addMessage = function addMessage(message) {
   this.lastMessage = message;
 };
 
+roomSchema.methods.hasUser = function hasUser(user) {
+  let isExist = this.invitedUsers.some((invitedUser) => invitedUser._id.equals(user._id));
+  isExist = isExist || this.users.some((eachUser) => eachUser._id.equals(user._id));
+
+  return isExist;
+};
+
+roomSchema.methods.addUser = function addUser(user) {
+  if (this.hasUser(user)) return;
+
+  this.invitedUsers.push(user);
+};
+
+
 roomSchema.methods.convertToClientObject = function convertToClientObject() {
   const clientObject = {};
   const invitedUsers = this.invitedUsers.map((invitedUser) => invitedUser.convertToClientObject());

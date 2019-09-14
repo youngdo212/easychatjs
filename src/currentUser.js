@@ -1,5 +1,4 @@
 import formurlencoded from 'form-urlencoded';
-import Room from './room';
 
 export default class CurrentUser {
   constructor({ user, origin, socket }) {
@@ -35,12 +34,7 @@ export default class CurrentUser {
 
   onRoomAdded(callback) {
     this.socket.on('room-added', (room, ack) => {
-      const roomForClient = new Room({
-        room,
-        origin: this.origin,
-      });
-
-      callback(roomForClient);
+      callback(room);
       ack && ack();
     });
   }
@@ -67,14 +61,10 @@ export default class CurrentUser {
 
   onRoomUpdated(callback) {
     this.socket.on('room-updated', (room) => {
-      const roomForClient = new Room({
-        room,
-        origin: this.origin,
-      });
       const openedRoom = this.openedRooms[room._id];
 
-      if (openedRoom) openedRoom.hooks.onUpdate(roomForClient);
-      callback(roomForClient);
+      if (openedRoom) openedRoom.hooks.onUpdate(room);
+      callback(room);
     });
   }
 
@@ -187,5 +177,19 @@ export default class CurrentUser {
       method: 'POST',
       credentials: 'include',
     });
+  }
+
+  async addUsersToRoom({ roomId, userIds }) {
+    const data = JSON.stringify({ userIds });
+    const response = await fetch(`${this.origin}/rooms/${roomId}/users`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    });
+
+    if (!response.ok) throw Error('already existed user');
   }
 }

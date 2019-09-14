@@ -30,6 +30,7 @@ window.Messenger = class {
     return currentUser;
   }
 
+  // deprecated
   onUserStateChanged(callback) {
     this.socket.on('user-state-changed', (user) => {
       if (!user) {
