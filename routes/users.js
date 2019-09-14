@@ -81,9 +81,10 @@ router.get('/auth/signout', async (req, res) => {
   res.send();
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
   const { email, password, nickname } = req.body;
   const { projectId, socketId } = req.session;
+  const socket = req.io.sockets.connected[socketId];
 
   const project = await Project.findById(projectId).then();
 
@@ -94,17 +95,13 @@ router.post('/', async (req, res, next) => {
     nickname,
   });
 
-  try {
-    user = await user.save().then();
-    project.users.push(user);
-    await project.save().then();
-    req.session.userId = user._id;
-    req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
-    res.send(user.convertToClientObject());
-  } catch (error) {
-    console.error(error);
-    next();
-  }
+  user = await user.save().then();
+  project.users.push(user);
+  await project.save().then();
+  req.session.userId = user._id;
+  req.io.to(socketId).emit('user-state-changed', user.convertToClientObject());
+  socket.join(user._id);
+  res.send(user.convertToClientObject());
 });
 
 router.post('/auth/signin', async (req, res, next) => {
