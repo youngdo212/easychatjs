@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   }],
   isPresent: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   rooms: [{
     type: mongoose.Schema.Types.ObjectId,
