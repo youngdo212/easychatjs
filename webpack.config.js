@@ -4,7 +4,7 @@ module.exports = {
   mode: 'development',
   entry: './src/index.js',
   output: {
-    filename: 'messenger.js',
+    filename: 'easychat.js',
     path: path.resolve(__dirname, 'public/sdk'),
   },
   watch: true,

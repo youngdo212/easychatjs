@@ -2,9 +2,9 @@ import io from 'socket.io-client';
 import formurlencoded from 'form-urlencoded';
 import CurrentUser from './currentUser';
 
-window.Messenger = class {
+window.Easychat = class {
   constructor({ apiKey }) {
-    this.origin = 'http://localhost:3000';
+    this.origin = 'https://52.79.136.70';
     this.socket = null;
     this.apiKey = apiKey;
   }
