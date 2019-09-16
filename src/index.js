@@ -4,7 +4,7 @@ import CurrentUser from './currentUser';
 
 window.Easychat = class {
   constructor({ apiKey }) {
-    this.origin = 'http://52.79.136.70';
+    this.origin = 'https://easychatjs.com';
     this.socket = null;
     this.apiKey = apiKey;
   }
