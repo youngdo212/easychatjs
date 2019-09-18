@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
-  origin: 'https://youngdocheon.com',
+  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://youngdocheon.com',
   credentials: true,
 }));
 
@@ -91,5 +91,7 @@ io.on('connection', (socket) => {
     if (error) console.error(error);
   });
 });
+
+console.log(`process.env.NODE_ENV : ${process.env.NODE_ENV}`);
 
 module.exports = app;

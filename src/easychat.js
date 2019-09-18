@@ -2,9 +2,8 @@ import io from 'socket.io-client';
 import formurlencoded from 'form-urlencoded';
 import CurrentUser from './currentUser';
 
-window.Easychat = class {
+export default class Easychat {
   constructor({ apiKey }) {
-    this.origin = 'https://easychatjs.com';
     this.socket = null;
     this.apiKey = apiKey;
   }
@@ -147,4 +146,4 @@ window.Easychat = class {
 
     return room;
   }
-};
+}

@@ -1,11 +1,20 @@
 const path = require('path');
 
-module.exports = {
-  mode: 'development',
-  entry: './src/index.js',
+const config = {
   output: {
     filename: 'easychat.js',
     path: path.resolve(__dirname, 'public/sdk'),
   },
-  watch: true,
+};
+
+module.exports = (env, argv) => {
+  if (argv.mode === 'development') {
+    config.entry = './src/dev.js';
+  }
+
+  if (argv.mode === 'production') {
+    config.entry = './src/prod.js';
+  }
+
+  return config;
 };
