@@ -1,6 +1,11 @@
 # EasychatJS
 Javascript SDK to build web chat
 
+## Table of Contents
+* [Getting Started](#getting-started)
+* [API Reference](#api-reference)
+  * [Easychat](#easychat)
+
 ## Getting Started
 1. Sign in to the [easychatJS website](https://easychatjs.com/auth/signin).
     * If you don't have a account yet, sign up [here](https://easychatjs.com/auth/signup).
@@ -21,7 +26,7 @@ Javascript SDK to build web chat
 ```
 5. That's all it takes to load easychatJS SDK. Build your messenger by using api references below!
 
-## API reference
+## API Reference
 ### Easychat
 To get started with easychat, you should instantiate `Easychat` instance. When instantiating, project api key is required.
 ```javascript
@@ -29,8 +34,8 @@ const easychat = new Easychat({
   apiKey: 'PROJECT_API_KEY',
 });
 ```
-#### Methods
-**Constructor**
+#### methods
+**constructor**
 ```javascript
 new Easychat(options)
 ```
