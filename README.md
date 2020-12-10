@@ -1,6 +1,8 @@
 # EasychatJS
 Javascript SDK to build web chat
 
+![screen-record](images/record.gif)
+
 ## Table of Contents
 * [Getting Started](#getting-started)
 * [API Reference](#api-reference)
