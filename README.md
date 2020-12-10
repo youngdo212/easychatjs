@@ -1,6 +1,8 @@
 # EasychatJS
 Javascript SDK to build web chat
 
+![screen-record](images/record.gif)
+
 ## Table of Contents
 * [Getting Started](#getting-started)
 * [API Reference](#api-reference)
@@ -11,7 +13,7 @@ Javascript SDK to build web chat
     * If you don't have a account yet, sign up [here](https://easychatjs.com/auth/signup).
 2. Create a project on the easychatJS dashboard.
 3. Copy project's api key.
-4. Insert this code directly before closing &lt;body&gt; tag in your app.
+4. Insert this code to the bottom of your &lt;body&gt; tag, but before you use EasychatJS service.
 ```html
 <script src="https://easychatjs.com/sdk/easychat.js"></script>
 <script>
