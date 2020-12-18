@@ -3,12 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "NODE_ENV=production node ./bin/www",
     "start:dev": "NODE_ENV=development node ./bin/www",
-    "build": "webpack --mode=production",
-    "build:dev": "webpack --mode=development",
-    "serve": "pm2 start ecosystem.config.js --env production --watch",
-    "serve:dev": "pm2 start ecosystem.config.js --watch"
+    "build": "webpack --config webpack.prod.js",
+    "build:dev": "webpack --config webpack.dev.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.3",
@@ -26,10 +24,13 @@
     "socket.io-client": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^6.1.0",
+    "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-import": "^2.18.2",
+    "prettier": "2.2.1",
     "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.6",
+    "webpack-merge": "^5.7.2"
   }
 }
