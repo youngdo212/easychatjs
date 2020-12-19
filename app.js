@@ -31,16 +31,23 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // express-session setup
-const sessionMiddleware = session({
+const sess = {
   secret: 'mandosecret',
   resave: true,
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    secure: true, // change to true, if using https
-    sameSite: 'none',
+    secure: false, // change to true, if using https
   },
-});
+};
+
+if (app.get('env') === 'production') {
+  app.set('trust proxy', 1); // trust first proxy
+  sess.cookie.secure = true; // serve secure cookies
+  sess.cookie.sameSite = 'none';
+}
+
+const sessionMiddleware = session(sess);
 app.use(sessionMiddleware);
 
 app.use(logger('dev'));
