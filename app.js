@@ -32,7 +32,7 @@ app.set('view engine', 'pug');
 
 // express-session setup
 
-app.set('trust proxy', true); // trust first proxy
+app.set('trust proxy', 1); // trust first proxy
 const sess = {
   secret: 'mandosecret',
   resave: true,
@@ -40,7 +40,6 @@ const sess = {
   cookie: {
     httpOnly: true,
     secure: true, // change to true, if using https
-    sameSite: 'none',
   },
 };
 
