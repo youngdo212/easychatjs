@@ -37,7 +37,7 @@ const sessionMiddleware = session({
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    secure: true, // change to true, if using https
+    secure: false, // change to true, if using https
     sameSite: 'none',
   },
 });
