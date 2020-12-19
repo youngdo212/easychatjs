@@ -21,8 +21,10 @@ const app = express();
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', console.log.bind(console, 'mongoose is connected!'));
-mongoose.connect('mongodb://localhost:27017/messengerdb', { useNewUrlParser: true });
-
+mongoose.connect('mongodb://localhost:27017/messengerdb', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -45,10 +47,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({
-  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : 'https://youngdocheon.com',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:8080'
+        : 'https://youngdocheon.com',
+    credentials: true,
+  })
+);
 
 // socket.io setup
 app.io = io;
