@@ -4,6 +4,10 @@ import CurrentUser from './currentUser';
 
 export default class Easychat {
   constructor({ apiKey }) {
+    this.origin =
+      process.env.NODE_ENV === 'production'
+        ? 'https://easychatjs.com'
+        : 'http://localhost:3000';
     this.socket = null;
     this.apiKey = apiKey;
   }
@@ -12,7 +16,9 @@ export default class Easychat {
     this.socket = io(this.origin);
 
     // set and check cookie
-    const response = await fetch(`${this.origin}/projects/${this.apiKey}`, { credentials: 'include' });
+    const response = await fetch(`${this.origin}/projects/${this.apiKey}`, {
+      credentials: 'include',
+    });
 
     if (!response.ok) throw new Error('api key incorrect');
 
@@ -55,7 +61,10 @@ export default class Easychat {
       nickname,
     });
 
-    const response1 = await fetch(`${this.origin}/users?field=email&value=${encodedEmail}`, { credentials: 'include' });
+    const response1 = await fetch(
+      `${this.origin}/users?field=email&value=${encodedEmail}`,
+      { credentials: 'include' }
+    );
     const users = await response1.json();
 
     if (users.length) throw new Error('this email has already taken');
@@ -122,8 +131,10 @@ export default class Easychat {
     let users = null;
 
     fields.forEach((eachField) => {
-      const promise = fetch(`${this.origin}/users?field=${eachField}&value=${encodedValue}`, { credentials: 'include' })
-        .then((response) => response.json());
+      const promise = fetch(
+        `${this.origin}/users?field=${eachField}&value=${encodedValue}`,
+        { credentials: 'include' }
+      ).then((response) => response.json());
 
       promises.push(promise);
     });
@@ -131,17 +142,22 @@ export default class Easychat {
     users = await Promise.all(promises);
     users = users.flat();
 
-    return users.filter((user, index) => (users.findIndex((e) => e.email === user.email) >= index));
+    return users.filter(
+      (user, index) => users.findIndex((e) => e.email === user.email) >= index
+    );
   }
 
   async getUsers(field, value) {
     const encodedValue = encodeURIComponent(value);
-    return fetch(`${this.origin}/users?field=${field}&value=${encodedValue}`, { credentials: 'include' })
-      .then((response) => response.json());
+    return fetch(`${this.origin}/users?field=${field}&value=${encodedValue}`, {
+      credentials: 'include',
+    }).then((response) => response.json());
   }
 
   async getRoom(id) {
-    const response = await fetch(`${this.origin}/rooms/${id}`, { credentials: 'include' });
+    const response = await fetch(`${this.origin}/rooms/${id}`, {
+      credentials: 'include',
+    });
     const room = await response.json();
 
     return room;

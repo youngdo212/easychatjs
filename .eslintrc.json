@@ -6,14 +6,16 @@
         "node": true
     },
     "extends": [
-        "airbnb-base"
+        "eslint:recommended",
+        "prettier"
     ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
     "parserOptions": {
-        "ecmaVersion": 2018
+        "ecmaVersion": 2018,
+        "sourceType": "module"
     },
     "rules": {
         "no-param-reassign": ["error", { "props": false }],
