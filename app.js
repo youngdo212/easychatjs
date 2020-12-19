@@ -32,7 +32,6 @@ app.set('view engine', 'pug');
 
 // express-session setup
 
-app.set('trust proxy', 1); // trust first proxy
 const sess = {
   secret: 'mandosecret',
   resave: true,
