@@ -30,8 +30,13 @@ mongoose.connect('mongodb://localhost:27017/messengerdb', {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-// express-session setup
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
+// express-session setup
 app.set('trust proxy', 1); // trust first proxy
 const sess = {
   secret: 'mandosecret',
@@ -40,17 +45,13 @@ const sess = {
   cookie: {
     httpOnly: true,
     secure: true, // change to true, if using https
+    sameSite: 'none',
   },
 };
 
 const sessionMiddleware = session(sess);
 app.use(sessionMiddleware);
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(
   cors({
     origin:
