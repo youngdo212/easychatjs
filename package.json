@@ -1,5 +1,5 @@
 {
-  "name": "web-messenger-sdk-server",
+  "name": "@mando212/easychat",
   "version": "0.0.0",
   "private": true,
   "scripts": {
