@@ -6,7 +6,7 @@ export default class Easychat {
   constructor({ apiKey }) {
     this.origin =
       process.env.NODE_ENV === 'production'
-        ? 'https://3.35.107.126'
+        ? 'https://easychatjs.com'
         : 'http://localhost:3000';
     this.socket = null;
     this.apiKey = apiKey;
