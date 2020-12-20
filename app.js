@@ -26,6 +26,26 @@ mongoose.connect('mongodb://localhost:27017/messengerdb', {
   useUnifiedTopology: true,
 });
 
+// express-session setup
+const sess = {
+  secret: 'mandosecret',
+  resave: true,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    secure: false, // change to true, if using https
+  },
+};
+
+if (app.get('env') === 'production') {
+  sess.cookie.secure = true;
+  sess.cookie.sameSite = 'none';
+  sess.cookie.domain = 'easychatjs.com';
+}
+
+const sessionMiddleware = session(sess);
+app.use(sessionMiddleware);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -35,21 +55,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// express-session setup
-const sess = {
-  secret: 'mandosecret',
-  resave: true,
-  saveUninitialized: true,
-  cookie: {
-    httpOnly: true,
-    secure: false, // change to true, if using https
-    sameSite: 'none',
-  },
-};
-
-const sessionMiddleware = session(sess);
-app.use(sessionMiddleware);
 
 app.use(
   cors({
