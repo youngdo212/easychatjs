@@ -37,7 +37,7 @@ const sess = {
   },
 };
 
-if (app.get('env') === 'production') {
+if (process.env.NODE_ENV === 'production') {
   sess.cookie.secure = true;
   sess.cookie.sameSite = 'none';
   sess.cookie.domain = 'easychatjs.com';
