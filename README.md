@@ -7,6 +7,7 @@ Javascript SDK to build web chat
 * [Getting Started](#getting-started)
 * [API Reference](#api-reference)
   * [Easychat](#easychat)
+  * [CurrentUser](#currentuser)
 
 ## Getting Started
 1. Sign in to the [easychatJS website](https://easychatjs.com/auth/signin).
@@ -29,6 +30,7 @@ Javascript SDK to build web chat
 5. That's all it takes to load easychatJS SDK. Build your messenger by using api references below!
 
 ## API Reference
+
 ### Easychat
 To get started with easychat, you should instantiate `Easychat` instance. When instantiating, project api key is required.
 ```javascript
@@ -36,7 +38,8 @@ const easychat = new Easychat({
   apiKey: 'PROJECT_API_KEY',
 });
 ```
-#### methods
+#### Methods
+
 **constructor**
 ```javascript
 new Easychat(options)
@@ -161,3 +164,231 @@ Finds room with room id. If it fails to find room with id, a promise is fulfille
 * Promise
   * resolve(room)
   * reject(error)
+
+### CurrentUser
+
+CurrentUser is a object that indicates logined user. It is passed in resolve argument of `easychat.initializeApp()`, `easychat.createUser()`, `easychat.signin()`.
+
+#### Methods
+
+**currentUser.onFriendRequested(callback)**
+```js
+currentUser.onFriendRequested((friendRequest) => {
+  ...
+})
+```
+Binds event handler to be called when someone requests friend to you. Callbacks will be invoked with friendRquest object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onFriendAdded(callback)**
+```js
+currentUser.onFriendAdded((user) => {
+  ...
+})
+```
+Binds event handler to be called when user gets a friend. Callbacks will be invoked with user object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onFriendPresenceChanged(callback)**
+```js
+currentUser.onFriendPresenceChanged((user) => {
+  ...
+})
+```
+Binds event handler to be called when friend presence state is changed(login or logout). Callbacks will be invoked with user object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onFriendRemoved(callback)**
+```js
+currentUser.onFriendRemoved((user) => {
+  ...
+})
+```
+Binds event handler to be called when friend is removed. Callbacks will be invoked with user object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onRoomAdded(callback)**
+```js
+currentUser.onRoomAdded((room) => {
+  ...
+})
+```
+Binds event handler to be called when user joined a room. Callbacks will be invoked with room object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onMessage(callback)**
+```js
+currentUser.onMessage((message) => {
+  ...
+})
+```
+Binds event handler to be called when user receives a message. Callbacks will be invoked with message object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onRoomRemoved(callback)**
+```js
+currentUser.onRoomRemoved((room) => {
+  ...
+})
+```
+Binds event handler to be called when user exit a room. Callbacks will be invoked with room object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.onRoomUpdated(callback)**
+```js
+currentUser.onRoomUpdated((room) => {
+  ...
+})
+```
+Binds event handler to be called when room state is changed. Callbacks will be invoked with room object.
+
+*arguments*
+* callback: Function - event handler
+
+**currentUser.requestFriend(id)**
+```js
+currentUser.requestFriend(id);
+```
+Requests user to be friend.
+
+*arguments*
+* id: String - user id who user want to be as friend
+
+**currentUser.responseFriendrequest(id, answer)**
+```js
+currentUser.responseFriendrequest(id, answer);
+```
+Responses friend request with answer.
+
+*arguments*
+* id: String - frientRequest id
+* answer: 'accept' | 'decline' - user's answer
+
+**currentUser.getFriendrequests()**
+```js
+currentUser.getFriendrequests().then((friendRequests) => {
+  ...
+});
+```
+Gets all friendrequests.
+
+*returns*
+* Promise
+  * resolve(frientrequests) - array of friend requests
+  * reject(error)
+
+**currentUser.getFriends(sortOption)**
+```js
+currentUser.getFriends(sortOption).then((friends) => {
+  ...
+});
+```
+Gets all friends sorted by option.
+
+*arguments*
+* sortOption
+  * sortOption.email: 'asc' | 'desc'
+  * sortOption.nickname: 'asc' | 'desc'
+  * sortOption.isPresent: 'asc' | 'desc'
+
+*returns*
+* Promise
+  * resolve(friends) - array of friends
+  * reject(error)
+
+**currentUser.getRooms()**
+```js
+currentUser.getRooms().then((rooms) => {
+  ...
+});
+```
+Gets all rooms that user has participated in.
+
+*returns*
+* Promise
+  * resolve(rooms) - array of rooms
+  * reject(error)
+
+**currentUser.removeFriend(id)**
+```js
+currentUser.removeFriend(id);
+```
+Removes friend using id.
+
+*arguments*
+* id: String - friend id to remove
+
+**currentUser.createRoom(roomOptions)**
+```js
+currentUser.createRoom(roomOptions);
+```
+Creates room with room options.
+
+*arguments*
+* roomOptions: object
+
+**currentUser.sendMessage({roomId, text})**
+```js
+currentUser.sendMessage({roomId, text});
+```
+Sends message to room.
+
+*arguments*
+* options
+  * options.roomId: String - room id
+  * options.text: String - message text
+
+
+**currentUser.openRoom({roomId, hooks})**
+```js
+currentUser.openRoom({roomId, hooks});
+```
+Opens room and register event handler to the room.
+
+*arguments*
+* options
+  * options.roomId: String - room id
+  * options.hooks: Object
+
+**currentUser.closeRoom(roomId)**
+```js
+currentUser.closeRoom(roomId});
+```
+Closes room and remove all hooks.
+
+*arguments*
+* roomId: String - room id
+
+**currentUser.leaveRoom(roomId)**
+```js
+currentUser.leaveRoom(roomId);
+```
+Leaves room permanently.
+
+*arguments*
+* roomId: String - room id
+
+**currentUser.addUsersToRoom({roomId, userIds})**
+```js
+currentUser.addUsersToRoom({roomId, userIds});
+```
+Invites users to room.
+
+*arguments*
+* options
+  * options.roomId: String - room id
+  * options.userIds: Array - array of user id
