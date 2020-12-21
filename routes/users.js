@@ -11,16 +11,20 @@ router.get('/', async (req, res) => {
   const { field, value } = req.query;
   const { projectId } = req.session;
   const decodedValue = decodeURIComponent(value);
-  const match = /^\/.*\/$/.test(decodedValue) ? new RegExp(decodedValue.slice(1, -1)) : decodedValue;
+  const match = /^\/.*\/$/.test(decodedValue)
+    ? new RegExp(decodedValue.slice(1, -1))
+    : decodedValue;
   const filter = {};
   let project = null;
 
   filter[field] = match;
 
-  project = await Project.findById(projectId).populate({
-    path: 'users',
-    match: filter,
-  }).then();
+  project = await Project.findById(projectId)
+    .populate({
+      path: 'users',
+      match: filter,
+    })
+    .then();
 
   res.send(project.users.map((user) => user.convertToClientObject()));
 });
@@ -33,16 +37,16 @@ router.get('/:id/friendrequests', async (req, res) => {
       populate: 'from to',
     })
     .then();
-  const friendrequests = user.friendrequests.map((friendrequest) => friendrequest.convertToClientObject());
+  const friendrequests = user.friendrequests.map((friendrequest) =>
+    friendrequest.convertToClientObject()
+  );
 
   res.send(friendrequests);
 });
 
 router.get('/:id/friends', async (req, res) => {
   const { id } = req.params;
-  const user = await User.findById(id)
-    .populate('friends')
-    .then();
+  const user = await User.findById(id).populate('friends').then();
   const friends = user.friends.map((friend) => friend.convertToClientObject());
 
   res.send(friends);
@@ -68,12 +72,12 @@ router.get('/auth/signout', async (req, res) => {
 
   await User.findByIdAndUpdate(userId, { $set: { isPresent: false } }).then();
 
-  user = await User.findById(userId)
-    .populate('friends')
-    .then();
+  user = await User.findById(userId).populate('friends').then();
 
   user.friends.forEach((friend) => {
-    req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());
+    req.io
+      .to(friend._id)
+      .emit('friend-presence-changed', user.convertToClientObject());
   });
 
   req.session.userId = '';
@@ -107,6 +111,7 @@ router.post('/', async (req, res) => {
 router.post('/auth/signin', async (req, res, next) => {
   const { email, password } = req.body;
   const { projectId, socketId } = req.session;
+  console.log(req.session);
   const socket = req.io.sockets.connected[socketId];
   let user = null;
 
@@ -117,7 +122,8 @@ router.post('/auth/signin', async (req, res, next) => {
         email,
         password,
       },
-    }).then();
+    })
+    .then();
 
   if (!project.users.length) {
     next();
@@ -132,7 +138,9 @@ router.post('/auth/signin', async (req, res, next) => {
   user = await User.findById(user._id).then();
 
   user.friends.forEach((friend) => {
-    req.io.to(friend._id).emit('friend-presence-changed', user.convertToClientObject());
+    req.io
+      .to(friend._id)
+      .emit('friend-presence-changed', user.convertToClientObject());
   });
 
   req.session.userId = user._id;
@@ -184,8 +192,12 @@ router.post('/:id/friends/:friendId/remove', async (req, res, next) => {
   const user = await User.findById(userId).then();
   const friend = await User.findById(friendId).then();
 
-  user.friends = user.friends.filter((eachFriendId) => eachFriendId.toString() !== friendId);
-  friend.friends = friend.friends.filter((eachFriendId) => eachFriendId.toString() !== userId);
+  user.friends = user.friends.filter(
+    (eachFriendId) => eachFriendId.toString() !== friendId
+  );
+  friend.friends = friend.friends.filter(
+    (eachFriendId) => eachFriendId.toString() !== userId
+  );
 
   await user.save();
   await friend.save();
@@ -216,11 +228,14 @@ router.post('/:id/rooms/:roomId/open', async (req, res, next) => {
       .populate('sender')
       .then();
 
-    return promises.then(() => new Promise((resolve) => {
-      socket.emit('message', messageForClient, () => {
-        resolve();
-      });
-    }));
+    return promises.then(
+      () =>
+        new Promise((resolve) => {
+          socket.emit('message', messageForClient, () => {
+            resolve();
+          });
+        })
+    );
   }, Promise.resolve());
 
   res.send();

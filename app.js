@@ -26,12 +26,8 @@ mongoose.connect('mongodb://localhost:27017/messengerdb', {
   useUnifiedTopology: true,
 });
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
 // express-session setup
-const sessionMiddleware = session({
+const sess = {
   secret: 'mandosecret',
   resave: true,
   saveUninitialized: true,
@@ -39,14 +35,27 @@ const sessionMiddleware = session({
     httpOnly: true,
     secure: false, // change to true, if using https
   },
-});
+};
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+  sess.cookie.secure = true;
+  sess.cookie.sameSite = 'none';
+}
+
+const sessionMiddleware = session(sess);
 app.use(sessionMiddleware);
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(
   cors({
     origin:
