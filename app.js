@@ -37,12 +37,12 @@ const sess = {
   },
 };
 
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
-  sess.cookie.secure = true;
-  sess.cookie.sameSite = 'none';
-  sess.cookie.domain = 'easychatjs.com';
-}
+// if (process.env.NODE_ENV === 'production') {
+//   app.set('trust proxy', 1);
+//   sess.cookie.secure = true;
+//   sess.cookie.sameSite = 'none';
+//   sess.cookie.domain = 'easychatjs.com';
+// }
 
 const sessionMiddleware = session(sess);
 app.use(sessionMiddleware);
