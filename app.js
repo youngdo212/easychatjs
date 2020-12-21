@@ -64,12 +64,12 @@ app.use(
         ? 'http://localhost:8080'
         : 'https://youngdocheon.com',
     credentials: true,
-    allowedHeaders: [
-      'Accept',
-      'Accept-Language',
-      'Content-Language',
-      'Content-Type',
-    ],
+    // allowedHeaders: [
+    //   'Accept',
+    //   'Accept-Language',
+    //   'Content-Language',
+    //   'Content-Type',
+    // ],
   })
 );
 
