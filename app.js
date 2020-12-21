@@ -33,14 +33,13 @@ const sess = {
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    secure: false, // change to true, if using https
+    secure: true,
+    sameSite: 'none',
   },
 };
 
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
-  sess.cookie.secure = true;
-  sess.cookie.sameSite = 'none';
 }
 
 const sessionMiddleware = session(sess);
@@ -60,7 +59,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === 'development'
-        ? 'http://localhost:8080'
+        ? 'https://localhost:8080'
         : 'https://youngdocheon.com',
     credentials: true,
   })

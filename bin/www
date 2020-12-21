@@ -6,7 +6,8 @@
 
 var app = require('../app');
 var debug = require('debug')('web-messenger-sdk-server:server');
-var http = require('http');
+var fs = require('fs');
+var path = require('path');
 
 /**
  * Get port from environment and store in Express.
@@ -16,12 +17,26 @@ var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
- * Create HTTP server.
+ * Creates HTTP or HTTPS server
  */
 
-var server = http.createServer(app);
+var server;
 
-// socket.io setup
+if (process.env.NODE_ENV === 'production') {
+  var http = require('http');
+  server = http.createServer(app);
+} else {
+  var https = require('https');
+  var certOptions = {
+    key: fs.readFileSync(path.resolve('certificate/server.key')),
+    cert: fs.readFileSync(path.resolve('certificate/server.crt')),
+  };
+  server = https.createServer(certOptions, app);
+}
+
+/**
+ * socket.io setup
+ */
 app.io.attach(server);
 
 /**
@@ -61,9 +76,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -86,8 +99,6 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
