@@ -60,3 +60,34 @@ table, th, td {
   border-radius: 5px;
   text-align: center;
 }
+
+.tag {
+  display: inline-block;
+  padding: 5px 8px;
+  background-color: #ccc;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+
+.tag:last-child {
+  margin-right: 0px;
+}
+
+.tag__remove {
+  margin-left: 5px;
+  background-color: transparent;
+  border: 0px;
+  cursor: pointer;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 5px;
+}
+
+.tag__remove:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.whitelist-input {
+  width: 150px;
+  margin-right: 10px;
+}

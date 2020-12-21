@@ -7,6 +7,8 @@ const cors = require('cors');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const io = require('socket.io')();
+const { getApiKeyFromPath } = require('./utils/whitelist');
+const Project = require('./models/project');
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
@@ -14,6 +16,7 @@ const projectsRouter = require('./routes/projects');
 const usersRouter = require('./routes/users');
 const friendrequestsRouter = require('./routes/friendrequests');
 const roomsRouter = require('./routes/rooms');
+const whitelistRouter = require('./routes/whitelist');
 
 const app = express();
 
@@ -55,15 +58,40 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === 'development'
-        ? 'https://localhost:8080'
-        : 'https://youngdocheon.com',
+/**
+ * CORS whitelist
+ */
+
+const corsOptionsDelegate = async function (req, callback) {
+  let corsOptions = {
+    origin: false,
     credentials: true,
-  })
-);
+  };
+  const origin = req.header('Origin');
+  const apiKey = getApiKeyFromPath(req.path);
+  const { projectId } = req.session;
+  let project;
+  let whitelist;
+
+  if (apiKey) {
+    project = await Project.findOne({ apiKey });
+  } else if (projectId) {
+    project = await Project.findById(projectId);
+  } else {
+    project = null;
+  }
+
+  whitelist = project ? project.whitelist : [];
+
+  whitelist.forEach((whiteUrl) => {
+    if (whiteUrl !== origin) return;
+    corsOptions.origin = origin;
+  });
+
+  callback(null, corsOptions); // callback expects two parameters: error and options
+};
+
+app.use(cors(corsOptionsDelegate));
 
 // socket.io setup
 app.io = io;
@@ -81,6 +109,7 @@ app.use('/projects', projectsRouter);
 app.use('/users', usersRouter);
 app.use('/friendrequests', friendrequestsRouter);
 app.use('/rooms', roomsRouter);
+app.use('/whitelist', whitelistRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

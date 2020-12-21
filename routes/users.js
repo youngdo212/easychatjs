@@ -111,7 +111,6 @@ router.post('/', async (req, res) => {
 router.post('/auth/signin', async (req, res, next) => {
   const { email, password } = req.body;
   const { projectId, socketId } = req.session;
-  console.log(req.session);
   const socket = req.io.sockets.connected[socketId];
   let user = null;
 
