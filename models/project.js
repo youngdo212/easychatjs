@@ -8,10 +8,13 @@ const projectSchema = new mongoose.Schema({
     type: String,
     default: cryptoRandomString.bind(this, { length: 15 }),
   },
-  users: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  }],
+  users: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  whitelist: [String],
 });
 
 module.exports = mongoose.model('Project', projectSchema);

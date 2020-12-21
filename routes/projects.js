@@ -9,7 +9,6 @@ router.get('/:apiKey', async (req, res, next) => {
   const { userId, socketId } = req.session;
   const socket = req.io.sockets.connected[socketId];
   const project = await Project.findOne({ apiKey });
-  console.log(project.id);
   const user = await User.findById(userId).then();
 
   if (!project) {

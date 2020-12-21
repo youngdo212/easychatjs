@@ -14,12 +14,20 @@ block content
         th.project-table__header.project-table__header--name name
         th.project-table__header.project-table__header--api-key api key
         th.project-table__header.project-table__header--delete delete
+        th.project-table__header.project-table__header--whitelist whitelist
       each project in projects
         tr
           td=project.name
           td=project.apiKey
           th
             button Delete
+          td
+            each whiteUrl in project.whitelist
+              .tag(data-project-id=project.id)
+                span.tag__title=whiteUrl
+                button.tag__remove X
+            input.whitelist-input(type="text" data-project-id=project.id)
+
   .modal
     .modal-content
       form(
