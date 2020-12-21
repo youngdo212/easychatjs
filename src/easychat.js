@@ -17,6 +17,7 @@ export default class Easychat {
 
     // set and check cookie
     const response = await fetch(`${this.origin}/projects/${this.apiKey}`, {
+      mode: 'cors',
       credentials: 'include',
     });
 
