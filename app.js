@@ -41,7 +41,6 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
   sess.cookie.secure = true;
   sess.cookie.sameSite = 'none';
-  // sess.cookie.domain = 'easychatjs.com';
 }
 
 const sessionMiddleware = session(sess);
@@ -64,12 +63,6 @@ app.use(
         ? 'http://localhost:8080'
         : 'https://youngdocheon.com',
     credentials: true,
-    // allowedHeaders: [
-    //   'Accept',
-    //   'Accept-Language',
-    //   'Content-Language',
-    //   'Content-Type',
-    // ],
   })
 );
 
