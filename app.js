@@ -72,9 +72,9 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
-io.use((socket, next) => {
-  sessionMiddleware(socket.request, socket.request.res, next);
-});
+// io.use((socket, next) => {
+//   sessionMiddleware(socket.request, socket.request.res, next);
+// });
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
@@ -102,10 +102,10 @@ app.use((err, req, res) => {
 io.on('connection', (socket) => {
   console.log('someone socket is connected!');
 
-  socket.request.session.socketId = socket.id;
-  socket.request.session.save((error) => {
-    if (error) console.error(error);
-  });
+  // socket.request.session.socketId = socket.id;
+  // socket.request.session.save((error) => {
+  //   if (error) console.error(error);
+  // });
 });
 
 console.log(`process.env.NODE_ENV : ${process.env.NODE_ENV}`);
